@@ -1,0 +1,66 @@
+#!/bin/bash
+
+# Ensure AWS CLI is configured with appropriate permissions
+GLOBAL_REGIONS=("aws-global" "aws-cn-global" "aws-us-gov-global")  # Include global regions
+
+# Path to jq executable
+JQ_PATH="C:\\Tools\\jq.exe"  # Update this with the actual path to your jq executable
+
+# Function to list resources using AWS Resource Explorer
+list_all_resources() {
+  local region=$1
+  echo "Listing resources in region: $region"
+  
+  # Initialize a variable to hold the next token
+  local next_token=""
+  local resources
+
+  while : ; do
+    if [ -z "$next_token" ]; then
+      # First request without the next token
+      resources=$(aws resource-explorer-2 search --query-string "" --region "$region" 2>&1)
+    else
+      # Subsequent requests with the next token
+      resources=$(aws resource-explorer-2 search --query-string "" --region "$region" --next-token "$next_token" 2>&1)
+    fi
+
+    # Check for errors and exit the loop if an error occurs
+    if echo "$resources" | grep -q "error"; then
+      echo "Error fetching resources in region $region: $resources"
+      break
+    fi
+
+    # Log the raw output for debugging
+    echo "Raw output for region $region: $resources" >> aws_resource_explorer.log
+
+    # Check if the output is valid JSON before processing with jq
+    if echo "$resources" | "$JQ_PATH" . > /dev/null 2>&1; then
+      # Extract and display the resource ARNs
+      echo "$resources" | "$JQ_PATH" -r '.Resources[].Arn'
+
+      # Extract the next token for pagination
+      next_token=$(echo "$resources" | "$JQ_PATH" -r '.NextToken')
+    else
+      echo "Invalid JSON output in region $region: $resources"
+      break
+    fi
+
+    # Break the loop if there is no next token
+    if [ "$next_token" == "null" ] || [ -z "$next_token" ]; then
+      break
+    fi
+  done
+}
+
+# List of regions to search in
+regions=$(aws ec2 describe-regions --query "Regions[].RegionName" --output text)
+
+# Loop through each region and list resources
+for region in $regions; do
+  list_all_resources "$region"
+done
+
+# Loop through each global region and list resources
+for region in "${GLOBAL_REGIONS[@]}"; do
+  list_all_resources "$region"
+done
