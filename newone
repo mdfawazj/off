@@ -1,0 +1,94 @@
+#!/bin/bash
+
+# Output file
+output_file="aws_resources_with_tags.csv"
+
+# Write the header to the output file
+echo "Resource Type,Resource Name,Resource ARN,Tags" > $output_file
+
+# Function to extract JSON values without jq
+extract_json_value() {
+    local json=$1
+    local key=$2
+    echo $json | sed -n "s|.*\"$key\":\"\([^\"]*\)\".*|\1|p"
+}
+
+# Function to get tags for a specific resource type
+get_tags() {
+    local resource_type=$1
+    local aws_command=$2
+    local name_key=$3
+
+    # Execute the AWS CLI command and capture JSON output
+    resources=$(eval $aws_command 2>/dev/null | grep -o '{[^}]*}')
+
+    # Check if no resources were found
+    if [ -z "$resources" ]; then
+        echo "No resources found for $resource_type."
+        return
+    fi
+
+    # Iterate over each resource JSON object
+    for resource in $resources; do
+        resource_arn=$(extract_json_value "$resource" "ResourceARN")
+        [ -z "$resource_arn" ] && resource_arn=$(extract_json_value "$resource" "Arn")
+        
+        # Extract resource name from JSON object based on provided key
+        resource_name=$(extract_json_value "$resource" "$name_key")
+        [ -z "$resource_name" ] && resource_name=$(extract_json_value "$resource" "Name")
+        [ -z "$resource_name" ] && resource_name=$(extract_json_value "$resource" "ResourceName")
+        [ -z "$resource_name" ] && resource_name=$(extract_json_value "$resource" "DBInstanceIdentifier")
+        [ -z "$resource_name" ] && resource_name=$(extract_json_value "$resource" "FunctionName")
+        [ -z "$resource_name" ] && resource_name=$(extract_json_value "$resource" "BucketName")
+        [ -z "$resource_name" ] && resource_name=$(extract_json_value "$resource" "StackName")
+
+        # Skip if resource ARN is empty
+        if [ -z "$resource_arn" ]; then
+            echo "Resource ARN is empty for ${resource_type}, skipping..."
+            continue
+        fi
+
+        # Retrieve tags for the resource using AWS Resource Groups Tagging API
+        tags=$(aws resourcegroupstaggingapi get-tags --resource-arn $resource_arn 2>/dev/null | grep -o '{[^}]*}' | awk -F'[:,]' '{for (i=1; i<=NF; i++) {gsub(/^[ \t]*|[ \t]*$/, "", $i); gsub(/^"|"$/, "", $i); if ($i ~ /^Key/) key=$i; else if ($i ~ /^Value/) value=$i;}} END {if (key && value) printf "%s=%s,", key, value; else printf ""}')
+        tags=${tags%,}  # Remove trailing comma
+
+        # Append resource information and tags to output file
+        echo "${resource_type},${resource_name},${resource_arn},${tags}" >> $output_file
+    done
+}
+
+# List of resource types and corresponding AWS CLI commands
+declare -A resource_types=(
+    ["ec2"]="aws ec2 describe-instances --query 'Reservations[].Instances[].{ResourceARN:InstanceId}'"
+    ["s3"]="aws s3api list-buckets --query 'Buckets[].{ResourceARN:Name}'"
+    ["lambda"]="aws lambda list-functions --query 'Functions[].{ResourceARN:FunctionArn, ResourceName:FunctionName}'"
+    ["rds"]="aws rds describe-db-instances --query 'DBInstances[].{ResourceARN:DBInstanceArn, ResourceName:DBInstanceIdentifier}'"
+    ["cloudformation"]="aws cloudformation list-stacks --query 'StackSummaries[].{ResourceARN:StackId, ResourceName:StackName}'"
+    ["ec2-ami"]="aws ec2 describe-images --owners self --query 'Images[].{ResourceARN:ImageId}'"
+    ["dynamodb"]="aws dynamodb list-tables --query 'TableNames[]' | grep -o '\"[^\"]*\"' | awk '{print "{\"ResourceARN\":\"arn:aws:dynamodb:'$(aws configure get region)':'$(aws sts get-caller-identity --query Account --output text)':table/"$1"\"}"}'"
+    ["sqs"]="aws sqs list-queues --query 'QueueUrls[]' | grep -o '\"[^\"]*\"' | awk '{split($1, a, "/"); print "{\"ResourceARN\":\""a[1]"\", \"ResourceName\":\""a[4]"\"}"}'"
+    ["sns"]="aws sns list-topics --query 'Topics[].{ResourceARN:TopicArn}'"
+    ["ecr"]="aws ecr describe-repositories --query 'repositories[].{ResourceARN:repositoryArn, ResourceName:repositoryName}'"
+    ["ecs"]="aws ecs list-clusters --query 'clusterArns[]' | grep -o '\"[^\"]*\"' | awk '{print "{\"ResourceARN\":"$1"}"}'"
+    ["elb"]="aws elb describe-load-balancers --query 'LoadBalancerDescriptions[].{ResourceARN:LoadBalancerName}'"
+    ["alb"]="aws elbv2 describe-load-balancers --query 'LoadBalancers[].{ResourceARN:LoadBalancerArn, ResourceName:LoadBalancerName}'"
+    ["cloudwatch"]="aws logs describe-log-groups --query 'logGroups[].{ResourceARN:arn, ResourceName:logGroupName}'"
+    ["iam-role"]="aws iam list-roles --query 'Roles[].{ResourceARN:Arn, ResourceName:RoleName}'"
+    ["iam-user"]="aws iam list-users --query 'Users[].{ResourceARN:Arn, ResourceName:UserName}'"
+    ["iam-policy"]="aws iam list-policies --query 'Policies[].{ResourceARN:Arn, ResourceName:PolicyName}'"
+    ["iam-group"]="aws iam list-groups --query 'Groups[].{ResourceARN:Arn, ResourceName:GroupName}'"
+    ["cloudfront"]="aws cloudfront list-distributions --query 'DistributionList.Items[].{ResourceARN:ARN, ResourceName:Id}'"
+    ["route53"]="aws route53 list-hosted-zones --query 'HostedZones[].{ResourceARN:Id, ResourceName:Name}'"
+    ["autoscaling"]="aws autoscaling describe-auto-scaling-groups --query 'AutoScalingGroups[].{ResourceARN:AutoScalingGroupARN, ResourceName:AutoScalingGroupName}'"
+    ["kms"]="aws kms list-keys --query 'Keys[].KeyId' | grep -o '\"[^\"]*\"' | awk '{print "{\"ResourceARN\":\"arn:aws:kms:'$(aws configure get region)':'$(aws sts get-caller-identity --query Account --output text)':key/"$1"\"}"}'"
+    ["elasticache"]="aws elasticache describe-cache-clusters --query 'CacheClusters[].{ResourceARN:CacheClusterId}'"
+    ["emr"]="aws emr list-clusters --query 'Clusters[].{ResourceARN:Id, ResourceName:Name}'"
+    ["cloudwatch-alarms"]="aws cloudwatch describe-alarms --query 'MetricAlarms[].{ResourceARN:AlarmArn, ResourceName:AlarmName}'"
+)
+
+# Iterate over resource types and get tags
+for resource_type in "${!resource_types[@]}"; do
+    get_tags $resource_type "${resource_types[$resource_type]}" "ResourceName"
+done
+
+echo "Resource information with tags has been written to $output_file"
