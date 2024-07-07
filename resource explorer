@@ -25,10 +25,13 @@ list_all_resources() {
     fi
 
     # Check for errors and exit the loop if an error occurs
-    if echo "$resources" | grep -qi "error"; then
+    if echo "$resources" | grep -q "error"; then
       echo "Error fetching resources in region $region: $resources"
       break
     fi
+
+    # Log the raw output for debugging
+    echo "Raw output for region $region: $resources" >> aws_resource_explorer.log
 
     # Check if the output is valid JSON before processing with jq
     if echo "$resources" | "$JQ_PATH" . > /dev/null 2>&1; then
