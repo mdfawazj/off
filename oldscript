@@ -5,6 +5,12 @@ run_aws_command() {
   eval $1
 }
 
+# Function to fetch tags for a resource based on its ARN
+fetch_tags() {
+  local arn=$1
+  aws resourcegroupstaggingapi list-tags --resource-arn-list $arn --output table --no-verify-ssl
+}
+
 # Define services and corresponding AWS CLI commands
 declare -A commands=(
   ["CodeDeploy"]="aws deploy list-applications --query 'applications[*].[applicationName, applicationArn]' --output table --no-verify-ssl"
@@ -16,7 +22,6 @@ declare -A commands=(
   ["Backup"]="aws backup list-backups --query 'BackupSummaries[*].[BackupId, Arn]' --output table --no-verify-ssl"
   ["Pinpoint"]="aws pinpoint get-applications --query 'ApplicationsResponse.Item[*].[Name, ApplicationId]' --output table --no-verify-ssl"
   ["S3"]="aws s3api list-buckets --query 'Buckets[*].[Name, Arn]' --output table --no-verify-ssl"
-  #["Elasticsearch"]="aws echo 'Not Available' --output table --no-verify-ssl"
   ["GuardDuty"]="aws guardduty list-detectors --query 'DetectorIds[*]' --output table --no-verify-ssl"
   ["Cloud9"]="aws cloud9 list-environments --query 'environmentIds[*]' --output table --no-verify-ssl"
   ["IAM"]="aws iam list-users --query 'Users[*].[UserName, Arn]' --output table --no-verify-ssl"
@@ -31,10 +36,9 @@ declare -A commands=(
   ["CloudFront"]="aws cloudfront list-distributions --query 'DistributionList.Items[*].[Id, ARN]' --output table --no-verify-ssl"
   ["ECS"]="aws ecs list-clusters --query 'clusterArns[*]' --output table --no-verify-ssl"
   ["Kinesis"]="aws kinesis list-streams --query 'StreamNames[*]' --output table --no-verify-ssl"
-  #["Cognito"]="aws echo 'Not Available' --output table --no-verify-ssl"
   ["KinesisFirehose"]="aws firehose list-delivery-streams --query 'DeliveryStreamNames[*]' --output table --no-verify-ssl"
   ["IoT"]="aws iot list-things --query 'things[*].[thingName, thingArn]' --output table --no-verify-ssl"
-  ["EC2"]="aws ec2 describe-instances --query 'Reservations[].Instances[].{Name: Tags[?Key==`Name`]|[0].Value, InstanceId: InstanceId}' --output table --no-verify-ssl"
+  ["EC2"]="aws ec2 describe-instances --query 'Reservations[].Instances[].{Name: Tags[?Key==\`Name\`]|[0].Value, InstanceId: InstanceId}' --output table --no-verify-ssl"
   ["ACM"]="aws acm list-certificates --query 'CertificateSummaryList[*].[DomainName, CertificateArn]' --output table --no-verify-ssl"
   ["Amplify"]="aws amplify list-apps --query 'apps[*].[name, appId]' --output table --no-verify-ssl"
   ["ApiGatewayV2"]="aws apigatewayv2 get-apis --query 'Items[*].[Name, ApiId]' --output table --no-verify-ssl"
@@ -55,22 +59,36 @@ declare -A commands=(
   ["CloudTrail"]="aws cloudtrail describe-trails --query 'trailList[*].[Name, TrailARN]' --output table --no-verify-ssl"
   ["SQS"]="aws sqs list-queues --query 'QueueUrls[*]' --output table --no-verify-ssl"
   ["Signer"]="aws signer list-signing-jobs --query 'jobs[*].[jobOwner, jobId]' --output table --no-verify-ssl"
-  #["OpenSearch"]="aws echo 'Not Available' --output table --no-verify-ssl"
   ["Athena"]="aws athena list-work-groups --query 'WorkGroups[*].[Name, State]' --output table --no-verify-ssl"
   ["Route53Resolver"]="aws route53resolver list-resolver-rules --query 'ResolverRules[*].[Name, Id]' --output table --no-verify-ssl"
   ["ServiceDiscovery"]="aws servicediscovery list-services --query 'Services[*].[Name, Id]' --output table --no-verify-ssl"
-  #["Cassandra"]="aws echo 'Not Available' --output table --no-verify-ssl"
   ["Lightsail"]="aws lightsail get-instances --query 'instances[*].[name, arn]' --output table --no-verify-ssl"
   ["WorkSpaces"]="aws workspaces describe-workspaces --query 'Workspaces[*].[UserName, WorkspaceId]' --output table --no-verify-ssl"
 )
 
 # Loop through the commands and run them
-for region in eu-north-1 eu-west-1 eu-west-2 eu-west-3 eu-central-1 us-east-1 us-east-2 us-west-1 us-west-2; do
 for service in "${!commands[@]}"; do
   echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+  echo "Service: $service"
   echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-  echo -e "$service\t"
-  run_aws_command "${commands[$service]} --region $region"
-  echo -e "\n"
-done
+  run_aws_command "${commands[$service]}"
+  if [[ $service == "EC2" ]]; then
+    # Fetch tags for EC2 instances
+    instances=$(aws ec2 describe-instances --query 'Reservations[].Instances[].InstanceId' --output text --no-verify-ssl)
+    for instance in $instances; do
+      tags=$(fetch_tags "arn:aws:ec2:::instance/$instance")
+      echo "Tags for instance $instance:"
+      echo "$tags"
+    done
+  elif [[ $service == "RDS" ]]; then
+    # Fetch tags for RDS instances
+    instances=$(aws rds describe-db-instances --query 'DBInstances[*].DBInstanceArn' --output text --no-verify-ssl)
+    for instance in $instances; do
+      tags=$(fetch_tags $instance)
+      echo "Tags for RDS instance $instance:"
+      echo "$tags"
+    done
+  # Add more elif blocks for other services as needed
+  fi
+  echo ""
 done
