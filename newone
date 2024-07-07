@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# Output file
-output_file="aws_resources_with_tags.csv"
-
-# Write the header to the output file
-echo "Resource Type,Resource Name,Resource ARN,Tags" > $output_file
-
 # Function to extract JSON values without jq
 extract_json_value() {
     local json=$1
@@ -13,8 +7,8 @@ extract_json_value() {
     echo $json | sed -n "s|.*\"$key\":\"\([^\"]*\)\".*|\1|p"
 }
 
-# Function to get tags for a specific resource type
-get_tags() {
+# Function to print resource information
+print_resource_info() {
     local resource_type=$1
     local aws_command=$2
     local name_key=$3
@@ -42,18 +36,8 @@ get_tags() {
         [ -z "$resource_name" ] && resource_name=$(extract_json_value "$resource" "BucketName")
         [ -z "$resource_name" ] && resource_name=$(extract_json_value "$resource" "StackName")
 
-        # Skip if resource ARN is empty
-        if [ -z "$resource_arn" ]; then
-            echo "Resource ARN is empty for ${resource_type}, skipping..."
-            continue
-        fi
-
-        # Retrieve tags for the resource using AWS Resource Groups Tagging API
-        tags=$(aws resourcegroupstaggingapi get-tags --resource-arn $resource_arn 2>/dev/null | grep -o '{[^}]*}' | awk -F'[:,]' '{for (i=1; i<=NF; i++) {gsub(/^[ \t]*|[ \t]*$/, "", $i); gsub(/^"|"$/, "", $i); if ($i ~ /^Key/) key=$i; else if ($i ~ /^Value/) value=$i;}} END {if (key && value) printf "%s=%s,", key, value; else printf ""}')
-        tags=${tags%,}  # Remove trailing comma
-
-        # Append resource information and tags to output file
-        echo "${resource_type},${resource_name},${resource_arn},${tags}" >> $output_file
+        # Print resource information
+        echo "${resource_type},${resource_name},${resource_arn}"
     done
 }
 
@@ -86,9 +70,7 @@ declare -A resource_types=(
     ["cloudwatch-alarms"]="aws cloudwatch describe-alarms --query 'MetricAlarms[].{ResourceARN:AlarmArn, ResourceName:AlarmName}'"
 )
 
-# Iterate over resource types and get tags
+# Iterate over resource types and print resource information
 for resource_type in "${!resource_types[@]}"; do
-    get_tags $resource_type "${resource_types[$resource_type]}" "ResourceName"
+    print_resource_info $resource_type "${resource_types[$resource_type]}" "ResourceName"
 done
-
-echo "Resource information with tags has been written to $output_file"
