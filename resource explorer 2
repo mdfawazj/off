@@ -11,46 +11,26 @@ list_all_resources() {
   local region="$1"
   echo "Listing resources in region: $region"
 
-  # Initialize variables for pagination
-  local next_token=""
-  local resources
+  # Request resources without handling pagination
+  local resources=$(aws resource-explorer-2 search --query-string "" --region "$region" --no-verify-ssl 2>&1)
 
-  # Loop to handle pagination
-  while true; do
-    if [ -z "$next_token" ]; then
-      # First request without the next token
-      resources=$(aws resource-explorer-2 search --query-string "" --region "$region" --no-verify-ssl 2>&1)
-    else
-      # Subsequent requests with the next token
-      resources=$(aws resource-explorer-2 search --query-string "" --region "$region" --next-token "$next_token" --no-verify-ssl 2>&1)
-    fi
+  # Check for errors
+  if echo "$resources" | grep -q "error"; then
+    echo "Error fetching resources in region $region: $resources"
+    return
+  fi
 
-    # Check for errors
-    if echo "$resources" | grep -q "error"; then
-      echo "Error fetching resources in region $region: $resources"
-      break
-    fi
+  # Log the raw output for debugging
+  echo "Raw output for region $region: $resources" >> aws_resource_explorer.log
 
-    # Log the raw output for debugging
-    echo "Raw output for region $region: $resources" >> aws_resource_explorer.log
+  # Check if the output is valid JSON before processing with jq
+  if ! echo "$resources" | "$JQ_PATH" . > /dev/null 2>&1; then
+    echo "Invalid JSON output in region $region: $resources"
+    return
+  fi
 
-    # Check if the output is valid JSON before processing with jq
-    if ! echo "$resources" | "$JQ_PATH" . > /dev/null 2>&1; then
-      echo "Invalid JSON output in region $region: $resources"
-      break
-    fi
-
-    # Extract and display the resource ARNs
-    echo "$resources" | "$JQ_PATH" -r '.Resources[].Arn'
-
-    # Extract the next token for pagination
-    next_token=$(echo "$resources" | "$JQ_PATH" -r '.NextToken')
-
-    # Break the loop if there is no next token
-    if [ "$next_token" == "null" ] || [ -z "$next_token" ]; then
-      break
-    fi
-  done
+  # Extract and display resource type, ARN, and tags
+  echo "$resources" | "$JQ_PATH" -r '.Resources[] | "\(.ResourceType), \(.Arn), Tags: \(.Tags)"'
 }
 
 # Loop through each specified region and list resources
