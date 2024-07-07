@@ -30,11 +30,17 @@ list_all_resources() {
       break
     fi
 
-    # Extract and display the resource ARNs
-    echo "$resources" | "$JQ_PATH" -r '.Resources[].Arn'
+    # Check if the output is valid JSON before processing with jq
+    if echo "$resources" | "$JQ_PATH" . > /dev/null 2>&1; then
+      # Extract and display the resource ARNs
+      echo "$resources" | "$JQ_PATH" -r '.Resources[].Arn'
 
-    # Extract the next token for pagination
-    next_token=$(echo "$resources" | "$JQ_PATH" -r '.NextToken')
+      # Extract the next token for pagination
+      next_token=$(echo "$resources" | "$JQ_PATH" -r '.NextToken')
+    else
+      echo "Invalid JSON output in region $region: $resources"
+      break
+    fi
 
     # Break the loop if there is no next token
     if [ "$next_token" == "null" ] || [ -z "$next_token" ]; then
