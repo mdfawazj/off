@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# Function to run AWS CLI command with output table format and no-verify-ssl flag
+run_aws_command() {
+  eval $1
+}
+
+# Define services and corresponding AWS CLI commands
+declare -A commands=(
+  ["CodeDeploy"]="aws deploy list-applications --query 'applications[*].[applicationName, applicationArn]' --output table --no-verify-ssl"
+  ["KMS"]="aws kms list-keys --query 'Keys[*].[KeyId, Arn]' --output table --no-verify-ssl"
+  ["Route53"]="aws route53 list-hosted-zones --query 'HostedZones[*].[Name, Id]' --output table --no-verify-ssl"
+  ["CodeBuild"]="aws codebuild list-projects --query 'projects[*].[name, arn]' --output table --no-verify-ssl"
+  ["AppSync"]="aws appsync list-graphql-apis --query 'graphqlApis[*].[name, apiId]' --output table --no-verify-ssl"
+  ["WAF"]="aws waf list-web-acls --query 'WebACLs[*].[Name, WebACLId]' --output table --no-verify-ssl"
+  ["Backup"]="aws backup list-backups --query 'BackupSummaries[*].[BackupId, Arn]' --output table --no-verify-ssl"
+  ["Pinpoint"]="aws pinpoint get-applications --query 'ApplicationsResponse.Item[*].[Name, ApplicationId]' --output table --no-verify-ssl"
+  ["S3"]="aws s3api list-buckets --query 'Buckets[*].[Name, Arn]' --output table --no-verify-ssl"
+  #["Elasticsearch"]="aws echo 'Not Available' --output table --no-verify-ssl"
+  ["GuardDuty"]="aws guardduty list-detectors --query 'DetectorIds[*]' --output table --no-verify-ssl"
+  ["Cloud9"]="aws cloud9 list-environments --query 'environmentIds[*]' --output table --no-verify-ssl"
+  ["IAM"]="aws iam list-users --query 'Users[*].[UserName, Arn]' --output table --no-verify-ssl"
+  ["Config"]="aws configservice describe-configuration-recorders --query 'ConfigurationRecorders[*].[name, arn]' --output table --no-verify-ssl"
+  ["SSM"]="aws ssm describe-parameters --query 'Parameters[*].[Name, ARN]' --output table --no-verify-ssl"
+  ["CodePipeline"]="aws codepipeline list-pipelines --query 'pipelines[*].[name, arn]' --output table --no-verify-ssl"
+  ["AppConfig"]="aws appconfig list-applications --query 'Items[*].[applicationId, name]' --output table --no-verify-ssl"
+  ["Events"]="aws events list-rules --query 'Rules[*].[Name, Arn]' --output table --no-verify-ssl"
+  ["Lambda"]="aws lambda list-functions --query 'Functions[*].[FunctionName, FunctionArn]' --output table --no-verify-ssl"
+  ["DynamoDB"]="aws dynamodb list-tables --query 'TableNames[*]' --output table --no-verify-ssl"
+  ["CloudWatch"]="aws cloudwatch list-metrics --query 'Metrics[*].[Namespace, MetricName]' --output table --no-verify-ssl"
+  ["CloudFront"]="aws cloudfront list-distributions --query 'DistributionList.Items[*].[Id, ARN]' --output table --no-verify-ssl"
+  ["ECS"]="aws ecs list-clusters --query 'clusterArns[*]' --output table --no-verify-ssl"
+  ["Kinesis"]="aws kinesis list-streams --query 'StreamNames[*]' --output table --no-verify-ssl"
+  #["Cognito"]="aws echo 'Not Available' --output table --no-verify-ssl"
+  ["KinesisFirehose"]="aws firehose list-delivery-streams --query 'DeliveryStreamNames[*]' --output table --no-verify-ssl"
+  ["IoT"]="aws iot list-things --query 'things[*].[thingName, thingArn]' --output table --no-verify-ssl"
+  ["EC2"]="aws ec2 describe-instances --query 'Reservations[].Instances[].{Name: Tags[?Key==`Name`]|[0].Value, InstanceId: InstanceId}' --output table --no-verify-ssl"
+  ["ACM"]="aws acm list-certificates --query 'CertificateSummaryList[*].[DomainName, CertificateArn]' --output table --no-verify-ssl"
+  ["Amplify"]="aws amplify list-apps --query 'apps[*].[name, appId]' --output table --no-verify-ssl"
+  ["ApiGatewayV2"]="aws apigatewayv2 get-apis --query 'Items[*].[Name, ApiId]' --output table --no-verify-ssl"
+  ["ApiGateway"]="aws apigateway get-rest-apis --query 'Items[*].[name, id]' --output table --no-verify-ssl"
+  ["AutoScaling"]="aws autoscaling describe-auto-scaling-groups --query 'AutoScalingGroups[*].[AutoScalingGroupName, AutoScalingGroupARN]' --output table --no-verify-ssl"
+  ["CloudFormation"]="aws cloudformation describe-stacks --query 'Stacks[*].[StackName, StackId]' --output table --no-verify-ssl"
+  ["CodeGuruReviewer"]="aws codeguru-reviewer list-repository-associations --query 'RepositoryAssociationSummaries[*].[Name, AssociationArn]' --output table --no-verify-ssl"
+  ["DMS"]="aws dms describe-replication-instances --query 'ReplicationInstances[*].[ReplicationInstanceIdentifier, ReplicationInstanceArn]' --output table --no-verify-ssl"
+  ["ElasticBeanstalk"]="aws elasticbeanstalk describe-applications --query 'Applications[*].[ApplicationName, ApplicationArn]' --output table --no-verify-ssl"
+  ["ElasticLoadBalancingV2"]="aws elbv2 describe-load-balancers --query 'LoadBalancers[*].[LoadBalancerName, LoadBalancerArn]' --output table --no-verify-ssl"
+  ["ResourceExplorer2"]="aws resource-groups list-groups --query 'GroupIdentifiers[*].[GroupName, GroupArn]' --output table --no-verify-ssl"
+  ["EventSchemas"]="aws eventschemas list-registries --query 'Registries[*].[RegistryName, RegistryArn]' --output table --no-verify-ssl"
+  ["SecretsManager"]="aws secretsmanager list-secrets --query 'SecretList[*].[Name, ARN]' --output table --no-verify-ssl"
+  ["SNS"]="aws sns list-topics --query 'Topics[*].[TopicArn, TopicArn]' --output table --no-verify-ssl"
+  ["StepFunctions"]="aws stepfunctions list-state-machines --query 'stateMachines[*].[name, stateMachineArn]' --output table --no-verify-ssl"
+  ["ECR"]="aws ecr describe-repositories --query 'repositories[*].[repositoryName, repositoryArn]' --output table --no-verify-ssl"
+  ["RDS"]="aws rds describe-db-instances --query 'DBInstances[*].[DBInstanceIdentifier, DBInstanceArn]' --output table --no-verify-ssl"
+  ["CloudTrail"]="aws cloudtrail describe-trails --query 'trailList[*].[Name, TrailARN]' --output table --no-verify-ssl"
+  ["SQS"]="aws sqs list-queues --query 'QueueUrls[*]' --output table --no-verify-ssl"
+  ["Signer"]="aws signer list-signing-jobs --query 'jobs[*].[jobOwner, jobId]' --output table --no-verify-ssl"
+  #["OpenSearch"]="aws echo 'Not Available' --output table --no-verify-ssl"
+  ["Athena"]="aws athena list-work-groups --query 'WorkGroups[*].[Name, State]' --output table --no-verify-ssl"
+  ["Route53Resolver"]="aws route53resolver list-resolver-rules --query 'ResolverRules[*].[Name, Id]' --output table --no-verify-ssl"
+  ["ServiceDiscovery"]="aws servicediscovery list-services --query 'Services[*].[Name, Id]' --output table --no-verify-ssl"
+  #["Cassandra"]="aws echo 'Not Available' --output table --no-verify-ssl"
+  ["Lightsail"]="aws lightsail get-instances --query 'instances[*].[name, arn]' --output table --no-verify-ssl"
+  ["WorkSpaces"]="aws workspaces describe-workspaces --query 'Workspaces[*].[UserName, WorkspaceId]' --output table --no-verify-ssl"
+)
+
+# Loop through the commands and run them
+for region in eu-north-1 eu-west-1 eu-west-2 eu-west-3 eu-central-1 us-east-1 us-east-2 us-west-1 us-west-2; do
+for service in "${!commands[@]}"; do
+  echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+  echo "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+  echo -e "$service\t"
+  run_aws_command "${commands[$service]} --region $region"
+  echo -e "\n"
+done
+done
