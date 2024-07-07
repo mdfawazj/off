@@ -1,261 +1,64 @@
-SSL validation failed for https://sts.us-east-1.amazonaws.com/ [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1002)
+ ./chtg_pull_script 
+urllib3\connectionpool.py:1056: InsecureRequestWarning: Unverified HTTPS request is being made to host 'sts.us-east-1.amazonaws.com'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/1.26.x/advanced-usage.html#ssl-warnings
 basename: missing operand
 Try 'basename --help' for more information.
 basename: missing operand
 Try 'basename --help' for more information.
+urllib3\connectionpool.py:1056: InsecureRequestWarning: Unverified HTTPS request is being made to host 'sts.us-east-1.amazonaws.com'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/1.26.x/advanced-usage.html#ssl-warnings
+urllib3\connectionpool.py:1056: InsecureRequestWarning: Unverified HTTPS request is being made to host 'sts.us-east-1.amazonaws.com'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/1.26.x/advanced-usage.html#ssl-warnings
+urllib3\connectionpool.py:1056: InsecureRequestWarning: Unverified HTTPS request is being made to host 'dynamodb.us-east-1.amazonaws.com'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/1.26.x/advanced-usage.html#ssl-warnings
+urllib3\connectionpool.py:1056: InsecureRequestWarning: Unverified HTTPS request is being made to host 'dynamodb.us-east-1.amazonaws.com'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/1.26.x/advanced-usage.html#ssl-warnings
 
-SSL validation failed for https://sts.us-east-1.amazonaws.com/ [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1002)
+Parameter validation failed:
+Invalid length for parameter ResourceARNList, value: 0, valid min length: 1
 
-SSL validation failed for https://sts.us-east-1.amazonaws.com/ [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1002)
+Parameter validation failed:
+Invalid length for parameter ResourceARNList, value: 0, valid min length: 1
 
-SSL validation failed for https://dynamodb.us-east-1.amazonaws.com/ [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1002)
+Parameter validation failed:
+Invalid length for parameter ResourceARNList, value: 0, valid min length: 1
 
-usage: aws [options] <command> <subcommand> [<subcommand> ...] [parameters]
-To see help text, you can run:
+Parameter validation failed:
+Invalid length for parameter ResourceARNList, value: 0, valid min length: 1
 
-  aws help
-  aws <command> help
-  aws <command> <subcommand> help
+Parameter validation failed:
+Invalid length for parameter ResourceARNList, value: 0, valid min length: 1
 
-aws.exe: error: argument operation: Invalid choice, valid choices are:
+Parameter validation failed:
+Invalid length for parameter ResourceARNList, value: 0, valid min length: 1
 
-describe-report-creation                 | get-compliance-summary
-get-resources                            | get-tag-keys
-get-tag-values                           | start-report-creation
-tag-resources                            | untag-resources
-help
+Parameter validation failed:
+Invalid length for parameter ResourceARNList, value: 0, valid min length: 1
 
+Parameter validation failed:
+Invalid length for parameter ResourceARNList, value: 0, valid min length: 1
 
-Invalid choice: 'get-tags', maybe you meant:
+Parameter validation failed:
+Invalid length for parameter ResourceARNList, value: 0, valid min length: 1
 
-  * get-tag-keys
+Parameter validation failed:
+Invalid length for parameter ResourceARNList, value: 0, valid min length: 1
 
+Parameter validation failed:
+Invalid length for parameter ResourceARNList, value: 0, valid min length: 1
 
-SSL validation failed for https://iam.amazonaws.com/ [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1002)
+Parameter validation failed:
+Invalid length for parameter ResourceARNList, value: 0, valid min length: 1
 
-usage: aws [options] <command> <subcommand> [<subcommand> ...] [parameters]
-To see help text, you can run:
+Parameter validation failed:
+Invalid length for parameter ResourceARNList, value: 0, valid min length: 1
 
-  aws help
-  aws <command> help
-  aws <command> <subcommand> help
+Parameter validation failed:
+Invalid length for parameter ResourceARNList, value: 0, valid min length: 1
 
-aws.exe: error: argument operation: Invalid choice, valid choices are:
+Parameter validation failed:
+Invalid length for parameter ResourceARNList, value: 0, valid min length: 1
 
-describe-report-creation                 | get-compliance-summary
-get-resources                            | get-tag-keys
-get-tag-values                           | start-report-creation
-tag-resources                            | untag-resources
-help
+Parameter validation failed:
+Invalid length for parameter ResourceARNList, value: 0, valid min length: 1
 
+Parameter validation failed:
+Invalid length for parameter ResourceARNList, value: 0, valid min length: 1
 
-Invalid choice: 'get-tags', maybe you meant:
-
-  * get-tag-keys
-
-
-SSL validation failed for https://elasticloadbalancing.us-east-1.amazonaws.com/ [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1002)
-
-usage: aws [options] <command> <subcommand> [<subcommand> ...] [parameters]
-To see help text, you can run:
-
-  aws help
-  aws <command> help
-  aws <command> <subcommand> help
-
-aws.exe: error: argument operation: Invalid choice, valid choices are:
-
-describe-report-creation                 | get-compliance-summary
-get-resources                            | get-tag-keys
-get-tag-values                           | start-report-creation
-tag-resources                            | untag-resources
-help
-
-
-Invalid choice: 'get-tags', maybe you meant:
-
-  * get-tag-keys
-
-
-SSL validation failed for https://route53.amazonaws.com/2013-04-01/hostedzone [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1002)
-
-usage: aws [options] <command> <subcommand> [<subcommand> ...] [parameters]
-To see help text, you can run:
-
-  aws help
-  aws <command> help
-  aws <command> <subcommand> help
-
-aws.exe: error: argument operation: Invalid choice, valid choices are:
-
-describe-report-creation                 | get-compliance-summary
-get-resources                            | get-tag-keys
-get-tag-values                           | start-report-creation
-tag-resources                            | untag-resources
-help
-
-
-Invalid choice: 'get-tags', maybe you meant:
-
-  * get-tag-keys
-
-
-SSL validation failed for https://logs.us-east-1.amazonaws.com/ [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1002)
-
-usage: aws [options] <command> <subcommand> [<subcommand> ...] [parameters]
-To see help text, you can run:
-
-  aws help
-  aws <command> help
-  aws <command> <subcommand> help
-
-aws.exe: error: argument operation: Invalid choice, valid choices are:
-
-describe-report-creation                 | get-compliance-summary
-get-resources                            | get-tag-keys
-get-tag-values                           | start-report-creation
-tag-resources                            | untag-resources
-help
-
-
-Invalid choice: 'get-tags', maybe you meant:
-
-  * get-tag-keys
-
-
-SSL validation failed for https://monitoring.us-east-1.amazonaws.com/ [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1002)
-
-usage: aws [options] <command> <subcommand> [<subcommand> ...] [parameters]
-To see help text, you can run:
-
-  aws help
-  aws <command> help
-  aws <command> <subcommand> help
-
-aws.exe: error: argument operation: Invalid choice, valid choices are:
-
-describe-report-creation                 | get-compliance-summary
-get-resources                            | get-tag-keys
-get-tag-values                           | start-report-creation
-tag-resources                            | untag-resources
-help
-
-
-Invalid choice: 'get-tags', maybe you meant:
-
-  * get-tag-keys
-
-
-SSL validation failed for https://ec2.us-east-1.amazonaws.com/ [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1002)
-
-usage: aws [options] <command> <subcommand> [<subcommand> ...] [parameters]
-To see help text, you can run:
-
-  aws help
-  aws <command> help
-  aws <command> <subcommand> help
-
-aws.exe: error: argument operation: Invalid choice, valid choices are:
-
-describe-report-creation                 | get-compliance-summary
-get-resources                            | get-tag-keys
-get-tag-values                           | start-report-creation
-tag-resources                            | untag-resources
-help
-
-
-Invalid choice: 'get-tags', maybe you meant:
-
-  * get-tag-keys
-
-
-SSL validation failed for https://elasticmapreduce.us-east-1.amazonaws.com/ [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1002)
-
-usage: aws [options] <command> <subcommand> [<subcommand> ...] [parameters]
-To see help text, you can run:
-
-  aws help
-  aws <command> help
-  aws <command> <subcommand> help
-
-aws.exe: error: argument operation: Invalid choice, valid choices are:
-
-describe-report-creation                 | get-compliance-summary
-get-resources                            | get-tag-keys
-get-tag-values                           | start-report-creation
-tag-resources                            | untag-resources
-help
-
-
-Invalid choice: 'get-tags', maybe you meant:
-
-  * get-tag-keys
-
-
-SSL validation failed for https://ecs.us-east-1.amazonaws.com/ [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1002)
-
-usage: aws [options] <command> <subcommand> [<subcommand> ...] [parameters]
-To see help text, you can run:
-
-  aws help
-  aws <command> help
-  aws <command> <subcommand> help
-
-aws.exe: error: argument operation: Invalid choice, valid choices are:
-
-describe-report-creation                 | get-compliance-summary
-get-resources                            | get-tag-keys
-get-tag-values                           | start-report-creation
-tag-resources                            | untag-resources
-help
-
-
-Invalid choice: 'get-tags', maybe you meant:
-
-  * get-tag-keys
-
-
-SSL validation failed for https://api.ecr.us-east-1.amazonaws.com/ [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1002)
-
-usage: aws [options] <command> <subcommand> [<subcommand> ...] [parameters]
-To see help text, you can run:
-
-  aws help
-  aws <command> help
-  aws <command> <subcommand> help
-
-aws.exe: error: argument operation: Invalid choice, valid choices are:
-
-describe-report-creation                 | get-compliance-summary
-get-resources                            | get-tag-keys
-get-tag-values                           | start-report-creation
-tag-resources                            | untag-resources
-help
-
-
-Invalid choice: 'get-tags', maybe you meant:
-
-  * get-tag-keys
-
-
-SSL validation failed for https://rds.us-east-1.amazonaws.com/ [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1002)
-
-usage: aws [options] <command> <subcommand> [<subcommand> ...] [parameters]
-To see help text, you can run:
-
-  aws help
-  aws <command> help
-  aws <command> <subcommand> help
-
-aws.exe: error: argument operation: Invalid choice, valid choices are:
-
-describe-report-creation                 | get-compliance-summary
-get-resources                            | get-tag-keys
-get-tag-values                           | start-report-creation
-tag-resources                            | untag-resources
-help
-
-
-Invalid choice: 'get-tags', maybe you meant:
-
-  * get-tag-keys
+Parameter validation failed:
+Invalid length for parameter ResourceARNList, value: 0, valid min length: 1
