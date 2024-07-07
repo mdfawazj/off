@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# Ensure AWS CLI is configured with appropriate permissions
+GLOBAL_REGIONS=("aws-global" "aws-cn-global" "aws-us-gov-global")  # Include global regions
+
+# Function to list resources using AWS Resource Explorer
+list_all_resources() {
+  local region=$1
+  echo "Listing resources in region: $region"
+  
+  # Initialize a variable to hold the next token
+  local next_token=""
+  local resources
+
+  while : ; do
+    if [ -z "$next_token" ]; then
+      # First request without the next token
+      resources=$(aws resource-explorer-2 search --query-string "" --region "$region")
+    else
+      # Subsequent requests with the next token
+      resources=$(aws resource-explorer-2 search --query-string "" --region "$region" --next-token "$next_token")
+    fi
+
+    # Extract and display the resource ARNs
+    echo "$resources" | jq -r '.Resources[].Arn'
+
+    # Extract the next token for pagination
+    next_token=$(echo "$resources" | jq -r '.NextToken')
+
+    # Break the loop if there is no next token
+    if [ "$next_token" == "null" ] || [ -z "$next_token" ]; then
+      break
+    fi
+  done
+}
+
+# List of regions to search in
+regions=$(aws ec2 describe-regions --query "Regions[].RegionName" --output text)
+
+# Loop through each region and list resources
+for region in $regions; do
+  list_all_resources "$region"
+done
+
+# Loop through each global region and list resources
+for region in "${GLOBAL_REGIONS[@]}"; do
+  list_all_resources "$region"
+done
