@@ -8,7 +8,7 @@ extract_json_value() {
 }
 
 # Function to print resource information
-print_resource_info() {
+print_resource_names() {
     local resource_type=$1
     local aws_command=$2
     local name_key=$3
@@ -22,12 +22,8 @@ print_resource_info() {
         return
     fi
 
-    # Iterate over each resource JSON object
+    # Iterate over each resource JSON object and print the name
     for resource in $resources; do
-        resource_arn=$(extract_json_value "$resource" "ResourceARN")
-        [ -z "$resource_arn" ] && resource_arn=$(extract_json_value "$resource" "Arn")
-        
-        # Extract resource name from JSON object based on provided key
         resource_name=$(extract_json_value "$resource" "$name_key")
         [ -z "$resource_name" ] && resource_name=$(extract_json_value "$resource" "Name")
         [ -z "$resource_name" ] && resource_name=$(extract_json_value "$resource" "ResourceName")
@@ -37,40 +33,40 @@ print_resource_info() {
         [ -z "$resource_name" ] && resource_name=$(extract_json_value "$resource" "StackName")
 
         # Print resource information
-        echo "${resource_type},${resource_name},${resource_arn}"
+        echo "${resource_type}, ${resource_name}"
     done
 }
 
 # List of resource types and corresponding AWS CLI commands
 declare -A resource_types=(
-    ["ec2"]="aws ec2 describe-instances --query 'Reservations[].Instances[].{ResourceARN:InstanceId}'"
-    ["s3"]="aws s3api list-buckets --query 'Buckets[].{ResourceARN:Name}'"
-    ["lambda"]="aws lambda list-functions --query 'Functions[].{ResourceARN:FunctionArn, ResourceName:FunctionName}'"
-    ["rds"]="aws rds describe-db-instances --query 'DBInstances[].{ResourceARN:DBInstanceArn, ResourceName:DBInstanceIdentifier}'"
-    ["cloudformation"]="aws cloudformation list-stacks --query 'StackSummaries[].{ResourceARN:StackId, ResourceName:StackName}'"
-    ["ec2-ami"]="aws ec2 describe-images --owners self --query 'Images[].{ResourceARN:ImageId}'"
-    ["dynamodb"]="aws dynamodb list-tables --query 'TableNames[]' | grep -o '\"[^\"]*\"' | awk '{print "{\"ResourceARN\":\"arn:aws:dynamodb:'$(aws configure get region)':'$(aws sts get-caller-identity --query Account --output text)':table/"$1"\"}"}'"
-    ["sqs"]="aws sqs list-queues --query 'QueueUrls[]' | grep -o '\"[^\"]*\"' | awk '{split($1, a, "/"); print "{\"ResourceARN\":\""a[1]"\", \"ResourceName\":\""a[4]"\"}"}'"
-    ["sns"]="aws sns list-topics --query 'Topics[].{ResourceARN:TopicArn}'"
-    ["ecr"]="aws ecr describe-repositories --query 'repositories[].{ResourceARN:repositoryArn, ResourceName:repositoryName}'"
-    ["ecs"]="aws ecs list-clusters --query 'clusterArns[]' | grep -o '\"[^\"]*\"' | awk '{print "{\"ResourceARN\":"$1"}"}'"
-    ["elb"]="aws elb describe-load-balancers --query 'LoadBalancerDescriptions[].{ResourceARN:LoadBalancerName}'"
-    ["alb"]="aws elbv2 describe-load-balancers --query 'LoadBalancers[].{ResourceARN:LoadBalancerArn, ResourceName:LoadBalancerName}'"
-    ["cloudwatch"]="aws logs describe-log-groups --query 'logGroups[].{ResourceARN:arn, ResourceName:logGroupName}'"
-    ["iam-role"]="aws iam list-roles --query 'Roles[].{ResourceARN:Arn, ResourceName:RoleName}'"
-    ["iam-user"]="aws iam list-users --query 'Users[].{ResourceARN:Arn, ResourceName:UserName}'"
-    ["iam-policy"]="aws iam list-policies --query 'Policies[].{ResourceARN:Arn, ResourceName:PolicyName}'"
-    ["iam-group"]="aws iam list-groups --query 'Groups[].{ResourceARN:Arn, ResourceName:GroupName}'"
-    ["cloudfront"]="aws cloudfront list-distributions --query 'DistributionList.Items[].{ResourceARN:ARN, ResourceName:Id}'"
-    ["route53"]="aws route53 list-hosted-zones --query 'HostedZones[].{ResourceARN:Id, ResourceName:Name}'"
-    ["autoscaling"]="aws autoscaling describe-auto-scaling-groups --query 'AutoScalingGroups[].{ResourceARN:AutoScalingGroupARN, ResourceName:AutoScalingGroupName}'"
-    ["kms"]="aws kms list-keys --query 'Keys[].KeyId' | grep -o '\"[^\"]*\"' | awk '{print "{\"ResourceARN\":\"arn:aws:kms:'$(aws configure get region)':'$(aws sts get-caller-identity --query Account --output text)':key/"$1"\"}"}'"
-    ["elasticache"]="aws elasticache describe-cache-clusters --query 'CacheClusters[].{ResourceARN:CacheClusterId}'"
-    ["emr"]="aws emr list-clusters --query 'Clusters[].{ResourceARN:Id, ResourceName:Name}'"
-    ["cloudwatch-alarms"]="aws cloudwatch describe-alarms --query 'MetricAlarms[].{ResourceARN:AlarmArn, ResourceName:AlarmName}'"
+    ["EC2 Instances"]="aws ec2 describe-instances --query 'Reservations[].Instances[].{Name:Tags[?Key==`Name`].Value | [0], ResourceName:InstanceId}'"
+    ["S3 Buckets"]="aws s3api list-buckets --query 'Buckets[].{Name:Name}'"
+    ["Lambda Functions"]="aws lambda list-functions --query 'Functions[].{Name:FunctionName}'"
+    ["RDS Instances"]="aws rds describe-db-instances --query 'DBInstances[].{Name:DBInstanceIdentifier}'"
+    ["CloudFormation Stacks"]="aws cloudformation list-stacks --query 'StackSummaries[].{Name:StackName}'"
+    ["EC2 AMIs"]="aws ec2 describe-images --owners self --query 'Images[].{Name:Name}'"
+    ["DynamoDB Tables"]="aws dynamodb list-tables --query 'TableNames[]'"
+    ["SQS Queues"]="aws sqs list-queues --query 'QueueUrls[]' | awk -F'/' '{print $NF}'"
+    ["SNS Topics"]="aws sns list-topics --query 'Topics[].{Name:TopicArn}'"
+    ["ECR Repositories"]="aws ecr describe-repositories --query 'repositories[].{Name:repositoryName}'"
+    ["ECS Clusters"]="aws ecs list-clusters --query 'clusterArns[]' | awk -F'/' '{print $NF}'"
+    ["Elastic Load Balancers"]="aws elb describe-load-balancers --query 'LoadBalancerDescriptions[].{Name:LoadBalancerName}'"
+    ["ALB/NLB"]="aws elbv2 describe-load-balancers --query 'LoadBalancers[].{Name:LoadBalancerName}'"
+    ["CloudWatch Log Groups"]="aws logs describe-log-groups --query 'logGroups[].{Name:logGroupName}'"
+    ["IAM Roles"]="aws iam list-roles --query 'Roles[].{Name:RoleName}'"
+    ["IAM Users"]="aws iam list-users --query 'Users[].{Name:UserName}'"
+    ["IAM Policies"]="aws iam list-policies --query 'Policies[].{Name:PolicyName}'"
+    ["IAM Groups"]="aws iam list-groups --query 'Groups[].{Name:GroupName}'"
+    ["CloudFront Distributions"]="aws cloudfront list-distributions --query 'DistributionList.Items[].{Name:Id}'"
+    ["Route 53 Hosted Zones"]="aws route53 list-hosted-zones --query 'HostedZones[].{Name:Name}'"
+    ["Auto Scaling Groups"]="aws autoscaling describe-auto-scaling-groups --query 'AutoScalingGroups[].{Name:AutoScalingGroupName}'"
+    ["KMS Keys"]="aws kms list-keys --query 'Keys[].KeyId'"
+    ["ElastiCache Clusters"]="aws elasticache describe-cache-clusters --query 'CacheClusters[].{Name:CacheClusterId}'"
+    ["EMR Clusters"]="aws emr list-clusters --query 'Clusters[].{Name:Name}'"
+    ["CloudWatch Alarms"]="aws cloudwatch describe-alarms --query 'MetricAlarms[].{Name:AlarmName}'"
 )
 
-# Iterate over resource types and print resource information
+# Iterate over resource types and print resource names
 for resource_type in "${!resource_types[@]}"; do
-    print_resource_info $resource_type "${resource_types[$resource_type]}" "ResourceName"
+    print_resource_names "$resource_type" "${resource_types[$resource_type]}" "Name"
 done
