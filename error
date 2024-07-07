@@ -1,0 +1,261 @@
+SSL validation failed for https://sts.us-east-1.amazonaws.com/ [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1002)
+basename: missing operand
+Try 'basename --help' for more information.
+basename: missing operand
+Try 'basename --help' for more information.
+
+SSL validation failed for https://sts.us-east-1.amazonaws.com/ [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1002)
+
+SSL validation failed for https://sts.us-east-1.amazonaws.com/ [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1002)
+
+SSL validation failed for https://dynamodb.us-east-1.amazonaws.com/ [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1002)
+
+usage: aws [options] <command> <subcommand> [<subcommand> ...] [parameters]
+To see help text, you can run:
+
+  aws help
+  aws <command> help
+  aws <command> <subcommand> help
+
+aws.exe: error: argument operation: Invalid choice, valid choices are:
+
+describe-report-creation                 | get-compliance-summary
+get-resources                            | get-tag-keys
+get-tag-values                           | start-report-creation
+tag-resources                            | untag-resources
+help
+
+
+Invalid choice: 'get-tags', maybe you meant:
+
+  * get-tag-keys
+
+
+SSL validation failed for https://iam.amazonaws.com/ [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1002)
+
+usage: aws [options] <command> <subcommand> [<subcommand> ...] [parameters]
+To see help text, you can run:
+
+  aws help
+  aws <command> help
+  aws <command> <subcommand> help
+
+aws.exe: error: argument operation: Invalid choice, valid choices are:
+
+describe-report-creation                 | get-compliance-summary
+get-resources                            | get-tag-keys
+get-tag-values                           | start-report-creation
+tag-resources                            | untag-resources
+help
+
+
+Invalid choice: 'get-tags', maybe you meant:
+
+  * get-tag-keys
+
+
+SSL validation failed for https://elasticloadbalancing.us-east-1.amazonaws.com/ [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1002)
+
+usage: aws [options] <command> <subcommand> [<subcommand> ...] [parameters]
+To see help text, you can run:
+
+  aws help
+  aws <command> help
+  aws <command> <subcommand> help
+
+aws.exe: error: argument operation: Invalid choice, valid choices are:
+
+describe-report-creation                 | get-compliance-summary
+get-resources                            | get-tag-keys
+get-tag-values                           | start-report-creation
+tag-resources                            | untag-resources
+help
+
+
+Invalid choice: 'get-tags', maybe you meant:
+
+  * get-tag-keys
+
+
+SSL validation failed for https://route53.amazonaws.com/2013-04-01/hostedzone [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1002)
+
+usage: aws [options] <command> <subcommand> [<subcommand> ...] [parameters]
+To see help text, you can run:
+
+  aws help
+  aws <command> help
+  aws <command> <subcommand> help
+
+aws.exe: error: argument operation: Invalid choice, valid choices are:
+
+describe-report-creation                 | get-compliance-summary
+get-resources                            | get-tag-keys
+get-tag-values                           | start-report-creation
+tag-resources                            | untag-resources
+help
+
+
+Invalid choice: 'get-tags', maybe you meant:
+
+  * get-tag-keys
+
+
+SSL validation failed for https://logs.us-east-1.amazonaws.com/ [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1002)
+
+usage: aws [options] <command> <subcommand> [<subcommand> ...] [parameters]
+To see help text, you can run:
+
+  aws help
+  aws <command> help
+  aws <command> <subcommand> help
+
+aws.exe: error: argument operation: Invalid choice, valid choices are:
+
+describe-report-creation                 | get-compliance-summary
+get-resources                            | get-tag-keys
+get-tag-values                           | start-report-creation
+tag-resources                            | untag-resources
+help
+
+
+Invalid choice: 'get-tags', maybe you meant:
+
+  * get-tag-keys
+
+
+SSL validation failed for https://monitoring.us-east-1.amazonaws.com/ [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1002)
+
+usage: aws [options] <command> <subcommand> [<subcommand> ...] [parameters]
+To see help text, you can run:
+
+  aws help
+  aws <command> help
+  aws <command> <subcommand> help
+
+aws.exe: error: argument operation: Invalid choice, valid choices are:
+
+describe-report-creation                 | get-compliance-summary
+get-resources                            | get-tag-keys
+get-tag-values                           | start-report-creation
+tag-resources                            | untag-resources
+help
+
+
+Invalid choice: 'get-tags', maybe you meant:
+
+  * get-tag-keys
+
+
+SSL validation failed for https://ec2.us-east-1.amazonaws.com/ [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1002)
+
+usage: aws [options] <command> <subcommand> [<subcommand> ...] [parameters]
+To see help text, you can run:
+
+  aws help
+  aws <command> help
+  aws <command> <subcommand> help
+
+aws.exe: error: argument operation: Invalid choice, valid choices are:
+
+describe-report-creation                 | get-compliance-summary
+get-resources                            | get-tag-keys
+get-tag-values                           | start-report-creation
+tag-resources                            | untag-resources
+help
+
+
+Invalid choice: 'get-tags', maybe you meant:
+
+  * get-tag-keys
+
+
+SSL validation failed for https://elasticmapreduce.us-east-1.amazonaws.com/ [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1002)
+
+usage: aws [options] <command> <subcommand> [<subcommand> ...] [parameters]
+To see help text, you can run:
+
+  aws help
+  aws <command> help
+  aws <command> <subcommand> help
+
+aws.exe: error: argument operation: Invalid choice, valid choices are:
+
+describe-report-creation                 | get-compliance-summary
+get-resources                            | get-tag-keys
+get-tag-values                           | start-report-creation
+tag-resources                            | untag-resources
+help
+
+
+Invalid choice: 'get-tags', maybe you meant:
+
+  * get-tag-keys
+
+
+SSL validation failed for https://ecs.us-east-1.amazonaws.com/ [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1002)
+
+usage: aws [options] <command> <subcommand> [<subcommand> ...] [parameters]
+To see help text, you can run:
+
+  aws help
+  aws <command> help
+  aws <command> <subcommand> help
+
+aws.exe: error: argument operation: Invalid choice, valid choices are:
+
+describe-report-creation                 | get-compliance-summary
+get-resources                            | get-tag-keys
+get-tag-values                           | start-report-creation
+tag-resources                            | untag-resources
+help
+
+
+Invalid choice: 'get-tags', maybe you meant:
+
+  * get-tag-keys
+
+
+SSL validation failed for https://api.ecr.us-east-1.amazonaws.com/ [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1002)
+
+usage: aws [options] <command> <subcommand> [<subcommand> ...] [parameters]
+To see help text, you can run:
+
+  aws help
+  aws <command> help
+  aws <command> <subcommand> help
+
+aws.exe: error: argument operation: Invalid choice, valid choices are:
+
+describe-report-creation                 | get-compliance-summary
+get-resources                            | get-tag-keys
+get-tag-values                           | start-report-creation
+tag-resources                            | untag-resources
+help
+
+
+Invalid choice: 'get-tags', maybe you meant:
+
+  * get-tag-keys
+
+
+SSL validation failed for https://rds.us-east-1.amazonaws.com/ [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1002)
+
+usage: aws [options] <command> <subcommand> [<subcommand> ...] [parameters]
+To see help text, you can run:
+
+  aws help
+  aws <command> help
+  aws <command> <subcommand> help
+
+aws.exe: error: argument operation: Invalid choice, valid choices are:
+
+describe-report-creation                 | get-compliance-summary
+get-resources                            | get-tag-keys
+get-tag-values                           | start-report-creation
+tag-resources                            | untag-resources
+help
+
+
+Invalid choice: 'get-tags', maybe you meant:
+
+  * get-tag-keys
