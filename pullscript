@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Check if jq is installed
+if ! command -v jq &> /dev/null
+then
+    echo "jq could not be found. Please install jq and try again."
+    exit
+fi
+
 # Output file
 output_file="aws_resources_with_tags.csv"
 
@@ -22,6 +29,11 @@ get_tags() {
         resource_arn=$(_jq '.ResourceARN // .Arn')
         resource_name=$(_jq ".${name_key} // .Name // .ResourceName // .DBInstanceIdentifier // .FunctionName // .BucketName // .StackName")
 
+        if [ -z "$resource_arn" ]; then
+            echo "Resource ARN is empty for ${resource_type}, skipping..."
+            continue
+        fi
+
         tags=$(aws resourcegroupstaggingapi get-tags --resource-arn $resource_arn | jq -r '.Tags | map("\(.Key)=\(.Value)") | join(",")')
         echo "${resource_type},${resource_name},${resource_arn},${tags}" >> $output_file
     done
@@ -43,7 +55,6 @@ declare -A resource_types=(
     ["elb"]="aws elb describe-load-balancers --query 'LoadBalancerDescriptions[].{ResourceARN:LoadBalancerName}'"
     ["alb"]="aws elbv2 describe-load-balancers --query 'LoadBalancers[].{ResourceARN:LoadBalancerArn, ResourceName:LoadBalancerName}'"
     ["cloudwatch"]="aws logs describe-log-groups --query 'logGroups[].{ResourceARN:arn, ResourceName:logGroupName}'"
-    ["s3"]="aws s3api list-buckets --query 'Buckets[].{ResourceARN:Name}'"
     ["iam-role"]="aws iam list-roles --query 'Roles[].{ResourceARN:Arn, ResourceName:RoleName}'"
     ["iam-user"]="aws iam list-users --query 'Users[].{ResourceARN:Arn, ResourceName:UserName}'"
     ["iam-policy"]="aws iam list-policies --query 'Policies[].{ResourceARN:Arn, ResourceName:PolicyName}'"
