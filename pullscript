@@ -1,0 +1,71 @@
+#!/bin/bash
+
+# Output file
+output_file="aws_resources_with_tags.csv"
+
+# Write the header to the output file
+echo "Resource Type,Resource Name,Resource ARN,Tags" > $output_file
+
+# Function to get tags for a specific resource type
+get_tags() {
+    resource_type=$1
+    aws_command=$2
+    name_key=$3
+    arn_key=$4
+
+    resources=$(eval $aws_command)
+
+    # Iterate over each resource and get tags
+    while IFS= read -r resource; do
+        resource_arn=$(echo $resource | awk -F\" '{print $4}')
+        resource_name=$(echo $resource | awk -F\" '{print $2}')
+
+        tags=$(aws resourcegroupstaggingapi get-tags --resource-arn $resource_arn | \
+            awk -F'"' '/"Key":/ {key=$4} /"Value":/ {value=$4; printf "%s=%s,", key, value}')
+        tags=${tags%,} # Remove the trailing comma
+
+        echo "${resource_type},${resource_name},${resource_arn},${tags}" >> $output_file
+    done <<< "$resources"
+}
+
+# List of resource types and corresponding AWS CLI commands
+declare -A resource_types=(
+    ["ec2"]="aws ec2 describe-instances --query 'Reservations[].Instances[].{id:InstanceId,arn:InstanceId}'"
+    ["s3"]="aws s3api list-buckets --query 'Buckets[].{name:Name,arn:Name}'"
+    ["lambda"]="aws lambda list-functions --query 'Functions[].{name:FunctionName,arn:FunctionArn}'"
+    ["rds"]="aws rds describe-db-instances --query 'DBInstances[].{name:DBInstanceIdentifier,arn:DBInstanceArn}'"
+    ["cloudformation"]="aws cloudformation list-stacks --query 'StackSummaries[].{name:StackName,arn:StackId}'"
+    ["ec2-ami"]="aws ec2 describe-images --owners self --query 'Images[].{id:ImageId,arn:ImageId}'"
+    ["dynamodb"]="aws dynamodb list-tables --query 'TableNames[]' | \
+        while read name; do echo "{\"name\":\"$name\",\"arn\":\"arn:aws:dynamodb:$(aws configure get region):$(aws sts get-caller-identity --query Account --output text):table/$name\"}"; done"
+    ["sqs"]="aws sqs list-queues --query 'QueueUrls[]' | \
+        while read url; do name=$(basename $url); echo "{\"name\":\"$name\",\"arn\":\"$url\"}"; done"
+    ["sns"]="aws sns list-topics --query 'Topics[].{arn:TopicArn}'"
+    ["ecr"]="aws ecr describe-repositories --query 'repositories[].{name:repositoryName,arn:repositoryArn}'"
+    ["ecs"]="aws ecs list-clusters --query 'clusterArns[]' | \
+        while read arn; do name=$(basename $arn); echo "{\"name\":\"$name\",\"arn\":\"$arn\"}"; done"
+    ["elb"]="aws elb describe-load-balancers --query 'LoadBalancerDescriptions[].{name:LoadBalancerName,arn:LoadBalancerName}'"
+    ["alb"]="aws elbv2 describe-load-balancers --query 'LoadBalancers[].{name:LoadBalancerName,arn:LoadBalancerArn}'"
+    ["cloudwatch"]="aws logs describe-log-groups --query 'logGroups[].{arn:arn}'"
+    ["iam-role"]="aws iam list-roles --query 'Roles[].{name:RoleName,arn:Arn}'"
+    ["iam-user"]="aws iam list-users --query 'Users[].{name:UserName,arn:Arn}'"
+    ["iam-policy"]="aws iam list-policies --query 'Policies[].{name:PolicyName,arn:Arn}'"
+    ["iam-group"]="aws iam list-groups --query 'Groups[].{name:GroupName,arn:Arn}'"
+    ["cloudfront"]="aws cloudfront list-distributions --query 'DistributionList.Items[].{name:Id,arn:ARN}'"
+    ["route53"]="aws route53 list-hosted-zones --query 'HostedZones[].{name:Name,arn:Id}' | \
+        while read json; do arn=$(echo $json | awk -F\" '{print $4}'); name=$(echo $json | awk -F\" '{print $2}'); echo "{\"name\":\"$name\",\"arn\":\"arn:aws:route53:::hostedzone/$arn\"}"; done"
+    ["autoscaling"]="aws autoscaling describe-auto-scaling-groups --query 'AutoScalingGroups[].{name:AutoScalingGroupName,arn:AutoScalingGroupARN}'"
+    ["kms"]="aws kms list-keys --query 'Keys[].{id:KeyId}' | \
+        while read json; do arn=$(echo $json | awk -F\" '{print $4}'); echo "{\"name\":\"$arn\",\"arn\":\"arn:aws:kms:$(aws configure get region):$(aws sts get-caller-identity --query Account --output text):key/$arn\"}"; done"
+    ["elasticache"]="aws elasticache describe-cache-clusters --query 'CacheClusters[].{name:CacheClusterId,arn:ARN}'"
+    ["emr"]="aws emr list-clusters --query 'Clusters[].{name:Id,arn:Id}' | \
+        while read json; do arn=$(echo $json | awk -F\" '{print $4}'); echo "{\"name\":\"$arn\",\"arn\":\"arn:aws:elasticmapreduce:$(aws configure get region):$(aws sts get-caller-identity --query Account --output text):cluster/$arn\"}"; done"
+    ["cloudwatch-alarms"]="aws cloudwatch describe-alarms --query 'MetricAlarms[].{name:AlarmName,arn:AlarmArn}'"
+)
+
+# Iterate over resource types and get tags
+for resource_type in "${!resource_types[@]}"; do
+    get_tags $resource_type "${resource_types[$resource_type]}" "name" "arn"
+done
+
+echo "Resource information with tags has been written to $output_file"
