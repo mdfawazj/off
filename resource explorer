@@ -3,6 +3,9 @@
 # Ensure AWS CLI is configured with appropriate permissions
 GLOBAL_REGIONS=("aws-global" "aws-cn-global" "aws-us-gov-global")  # Include global regions
 
+# Path to jq executable
+JQ_PATH="C:\\Tools\\jq.exe"  # Update this with the actual path to your jq executable
+
 # Function to list resources using AWS Resource Explorer
 list_all_resources() {
   local region=$1
@@ -15,17 +18,23 @@ list_all_resources() {
   while : ; do
     if [ -z "$next_token" ]; then
       # First request without the next token
-      resources=$(aws resource-explorer-2 search --query-string "" --region "$region")
+      resources=$(aws resource-explorer-2 search --query-string "" --region "$region" 2>&1)
     else
       # Subsequent requests with the next token
-      resources=$(aws resource-explorer-2 search --query-string "" --region "$region" --next-token "$next_token")
+      resources=$(aws resource-explorer-2 search --query-string "" --region "$region" --next-token "$next_token" 2>&1)
+    fi
+
+    # Check for errors and exit the loop if an error occurs
+    if echo "$resources" | grep -qi "error"; then
+      echo "Error fetching resources in region $region: $resources"
+      break
     fi
 
     # Extract and display the resource ARNs
-    echo "$resources" | jq -r '.Resources[].Arn'
+    echo "$resources" | "$JQ_PATH" -r '.Resources[].Arn'
 
     # Extract the next token for pagination
-    next_token=$(echo "$resources" | jq -r '.NextToken')
+    next_token=$(echo "$resources" | "$JQ_PATH" -r '.NextToken')
 
     # Break the loop if there is no next token
     if [ "$next_token" == "null" ] || [ -z "$next_token" ]; then
