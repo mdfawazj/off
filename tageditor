@@ -1,3 +1,14 @@
 AWS::Lambda::FunctionAWS::EC2::InstanceAWS::Route53::DomainAWS::ElasticLoadBalancing::LoadBalancerAWS::ElasticLoadBalancingV2::LoadBalancerAWS::ECS::ClusterAWS::S3::BucketAWS::ElasticBeanstalk::ApplicationAWS::RDS::DBClusterAWS::RDS::DBInstanceAWS::DynamoDB::TableAWS::SNS::TopicAWS::SQS::QueueAWS::Redshift::ClusterAWS::DMS::ReplicationTaskAWS::SecretsManager::SecretAWS::ElastiCache::CacheClusterAWS::Elasticsearch::Domain
 
 awscli for tag editor find resoures to tag in regions "all regions" resourcetype as "AWS::Lambda::FunctionAWS::EC2::InstanceAWS::Route53::DomainAWS::ElasticLoadBalancing::LoadBalancerAWS::ElasticLoadBalancingV2::LoadBalancerAWS::ECS::ClusterAWS::S3::BucketAWS::ElasticBeanstalk::ApplicationAWS::RDS::DBClusterAWS::RDS::DBInstanceAWS::DynamoDB::TableAWS::SNS::TopicAWS::SQS::QueueAWS::Redshift::ClusterAWS::DMS::ReplicationTaskAWS::SecretsManager::SecretAWS::ElastiCache::CacheClusterAWS::Elasticsearch::Domain"
+
+
+
+
+
+
+
+aws resourcegroupstaggingapi get-resources --region us-east-1 --resource-type-filters AWS::Lambda::Function --query 'ResourceTagMappingList[*].ResourceARN' --no-verify-ssl --output text
+urllib3\connectionpool.py:1056: InsecureRequestWarning: Unverified HTTPS request is being made to host 'tagging.us-east-1.amazonaws.com'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/1.26.x/advanced-usage.html#ssl-warnings
+
+An error occurred (InvalidParameterException) when calling the GetResources operation: Unsupported service=AWS in ResourceTypeFilter - AWS::Lambda::Function
