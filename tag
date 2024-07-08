@@ -13,3 +13,12 @@ for arn in $arns; do
     echo "Tags: $(echo $tags | jq '.ResourceTagMappingList[].Tags')"
     echo "----------------------------------"
 done
+
+
+
+
+for arn in $(aws resource-explorer-2 search --query-string "" --output json | jq -r '.Results[].ARN'); do
+    echo "Resource ARN: $arn"
+    aws resourcegroupstaggingapi get-resources --resource-arn-list $arn --output json | jq '.ResourceTagMappingList[].Tags'
+    echo "----------------------------------"
+done
