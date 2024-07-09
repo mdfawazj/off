@@ -12,3 +12,46 @@ aws resourcegroupstaggingapi get-resources --region us-east-1 --resource-type-fi
 urllib3\connectionpool.py:1056: InsecureRequestWarning: Unverified HTTPS request is being made to host 'tagging.us-east-1.amazonaws.com'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/1.26.x/advanced-usage.html#ssl-warnings
 
 An error occurred (InvalidParameterException) when calling the GetResources operation: Unsupported service=AWS in ResourceTypeFilter - AWS::Lambda::Function
+
+
+
+
+#!/bin/bash
+
+# List of all regions
+regions=$(aws ec2 describe-regions --query "Regions[].RegionName" --output text)
+
+# List of resource types (space-separated for AWS CLI compatibility)
+resource_types="lambda:function ec2:instance route53domain elasticloadbalancing:loadbalancer elasticloadbalancingv2:loadbalancer ecs:cluster s3:bucket elasticbeanstalk:application rds:cluster rds:db dynamodb:table sns:topic sqs:queue redshift:cluster dms:replication-task secretsmanager:secret elasticache:cluster es:domain"
+
+# Function to get resources and their tags for a specific region and resource types
+get_resources_and_tags() {
+    local region=$1
+    echo "Fetching resources and tags in region: $region"
+    aws resourcegroupstaggingapi get-resources \
+        --region "$region" \
+        --resource-type-filters $resource_types \
+        --query "ResourceTagMappingList[*]" \
+        --output json > resources.json
+
+    # Process JSON to extract ARNs and tags
+    while read -r line; do
+        if [[ $line == *"ResourceARN"* ]]; then
+            arn=$(echo $line | awk -F'"' '{print $4}')
+            resource_type=$(echo $arn | cut -d':' -f3)
+            echo -n "$resource_type, $arn"
+        elif [[ $line == *"Key"* ]]; then
+            key=$(echo $line | awk -F'"' '{print $4}')
+        elif [[ $line == *"Value"* ]]; then
+            value=$(echo $line | awk -F'"' '{print $4}')
+            echo -n ", $key=$value"
+        elif [[ $line == *"},"* ]]; then
+            echo
+        fi
+    done < resources.json
+}
+
+# Loop through all regions and get resources and tags
+for region in $regions; do
+    get_resources_and_tags "$region"
+done
