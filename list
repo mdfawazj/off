@@ -161,3 +161,120 @@ for REGION in $REGIONS; do
         done
     done
 done
+
+
+
+#!/bin/bash
+
+# Define AWS regions you want to query
+REGIONS=$(aws ec2 describe-regions --query 'Regions[*].RegionName' --output json | jq -r '.[]')
+
+# Define resource types to query
+RESOURCE_TYPES=(
+    "lambda"
+    "ec2"
+    "route53"
+    "elasticloadbalancing"
+    "ecs"
+    "ecr"
+    "s3"
+    "elasticbeanstalk"
+    "rds"
+    "dynamodb"
+    "sns"
+    "sms"
+    "sqs"
+    "redshift"
+    "dms"
+    "secretsmanager"
+    "elasticache"
+    "es"  # ElasticSearch
+)
+
+# Loop through each region
+for REGION in $REGIONS; do
+    echo "Region: $REGION"
+    
+    # Loop through each resource type
+    for RESOURCE_TYPE in "${RESOURCE_TYPES[@]}"; do
+        echo "Listing resources for type: $RESOURCE_TYPE in region $REGION"
+        
+        case "$RESOURCE_TYPE" in
+            "lambda")
+                aws lambda list-functions --region "$REGION" --query 'Functions[*].[FunctionName, FunctionArn]' --output json |
+                jq -r '.[] | "Resource ARN: \(.[1])\nTags: \(try .[0].Tags // "No tags found")\n----------------"'
+                ;;
+            "ec2")
+                aws ec2 describe-instances --region "$REGION" --query 'Reservations[*].Instances[*].[InstanceId, InstanceType, Tags[?Key==`Name`].Value | [0], Placement.AvailabilityZone]' --output json |
+                jq -r '.[][] | "Resource ID: \(.[0])\nResource Type: \(.[1])\nName: \(.[2])\nAvailability Zone: \(.[3])\n----------------"'
+                ;;
+            "route53")
+                aws route53 list-hosted-zones --query 'HostedZones[*].[Name, Id]' --output json |
+                jq -r '.[] | "Hosted Zone Name: \(.[0])\nHosted Zone ID: \(.[1])\n----------------"'
+                ;;
+            "elasticloadbalancing")
+                aws elbv2 describe-load-balancers --region "$REGION" --query 'LoadBalancers[*].[LoadBalancerName, LoadBalancerArn, Scheme, DNSName]' --output json |
+                jq -r '.[] | "Load Balancer Name: \(.[0])\nLoad Balancer ARN: \(.[1])\nScheme: \(.[2])\nDNS Name: \(.[3])\n----------------"'
+                ;;
+            "ecs")
+                aws ecs list-clusters --region "$REGION" --query 'clusterArns' --output json |
+                jq -r '.[] | "ECS Cluster ARN: \(.)\n----------------"'
+                ;;
+            "ecr")
+                aws ecr describe-repositories --region "$REGION" --query 'repositories[*].[repositoryName, repositoryArn, createdAt]' --output json |
+                jq -r '.[] | "ECR Repository Name: \(.[0])\nECR Repository ARN: \(.[1])\nCreated At: \(.[2])\n----------------"'
+                ;;
+            "s3")
+                aws s3api list-buckets --query 'Buckets[*].[Name, CreationDate]' --output json |
+                jq -r '.[] | "S3 Bucket Name: \(.[0])\nCreation Date: \(.[1])\n----------------"'
+                ;;
+            "elasticbeanstalk")
+                aws elasticbeanstalk describe-environments --region "$REGION" --query 'Environments[*].[EnvironmentName, EnvironmentId, PlatformArn]' --output json |
+                jq -r '.[] | "Elastic Beanstalk Environment Name: \(.[0])\nEnvironment ID: \(.[1])\nPlatform ARN: \(.[2])\n----------------"'
+                ;;
+            "rds")
+                aws rds describe-db-clusters --region "$REGION" --query 'DBClusters[*].[DBClusterIdentifier, DBClusterArn, Engine]' --output json |
+                jq -r '.[] | "RDS Aurora Cluster Name: \(.[0])\nCluster ARN: \(.[1])\nEngine: \(.[2])\n----------------"'
+                ;;
+            "dynamodb")
+                aws dynamodb list-tables --region "$REGION" --query 'TableNames' --output json |
+                jq -r '.[] | "DynamoDB Table Name: \(.)\n----------------"'
+                ;;
+            "sns")
+                aws sns list-topics --region "$REGION" --query 'Topics[*].[TopicArn]' --output json |
+                jq -r '.[] | "SNS Topic ARN: \(.)\n----------------"'
+                ;;
+            "sms")
+                aws sms list-apps --region "$REGION" --query 'Apps[*].[appId, name, serverGroup.launchOrder]' --output json |
+                jq -r '.[] | "SMS App ID: \(.[0])\nApp Name: \(.[1])\nLaunch Order: \(.[2])\n----------------"'
+                ;;
+            "sqs")
+                aws sqs list-queues --region "$REGION" --query 'QueueUrls' --output json |
+                jq -r '.[] | "SQS Queue URL: \(.)\n----------------"'
+                ;;
+            "redshift")
+                aws redshift describe-clusters --region "$REGION" --query 'Clusters[*].[ClusterIdentifier, ClusterArn, NodeType, ClusterStatus]' --output json |
+                jq -r '.[] | "Redshift Cluster Identifier: \(.[0])\nCluster ARN: \(.[1])\nNode Type: \(.[2])\nCluster Status: \(.[3])\n----------------"'
+                ;;
+            "dms")
+                aws dms describe-replication-instances --region "$REGION" --query 'ReplicationInstances[*].[ReplicationInstanceIdentifier, ReplicationInstanceArn, ReplicationInstanceClass]' --output json |
+                jq -r '.[] | "DMS Replication Instance Identifier: \(.[0])\nReplication Instance ARN: \(.[1])\nInstance Class: \(.[2])\n----------------"'
+                ;;
+            "secretsmanager")
+                aws secretsmanager list-secrets --region "$REGION" --query 'SecretList[*].[Name, ARN, LastChangedDate]' --output json |
+                jq -r '.[] | "Secret Name: \(.[0])\nSecret ARN: \(.[1])\nLast Changed Date: \(.[2])\n----------------"'
+                ;;
+            "elasticache")
+                aws elasticache describe-cache-clusters --region "$REGION" --query 'CacheClusters[*].[CacheClusterId, ARN, Engine]' --output json |
+                jq -r '.[] | "ElastiCache Cluster ID: \(.[0])\nCluster ARN: \(.[1])\nEngine: \(.[2])\n----------------"'
+                ;;
+            "es")
+                aws es list-domain-names --region "$REGION" --query 'DomainNames[*].[DomainName, ARN, ElasticsearchVersion]' --output json |
+                jq -r '.[] | "ElasticSearch Domain Name: \(.[0])\nDomain ARN: \(.[1])\nElasticsearch Version: \(.[2])\n----------------"'
+                ;;
+            *)
+                echo "Unsupported resource type: $RESOURCE_TYPE"
+                ;;
+        esac
+    done
+done
