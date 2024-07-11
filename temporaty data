@@ -1,0 +1,24 @@
+arn:aws:s3:::stackset-org-enable-config-ce802b80-configbucket-9aw42l6yda8q
+TAGS	aws:cloudformation:stack-name StackSet-org-enable-config-ce802b80-59c8-4a15-af02-d5957b9a08ef
+TAGS	aws:cloudformation:stack-id arn:aws:cloudformation:us-east-2:243575567843:stack/StackSet-org-enable-config-ce802b80-59c8-4a15-af02-d5957b9a08ef/07eefe90-264b-11ee-b43a-022237916e0b
+TAGS	aws:cloudformation:logical-id ConfigBucket
+arn:aws:sns:us-east-2:243575567843:config-topic-243575567843
+TAGS	aws:cloudformation:stack-name StackSet-org-enable-config-ce802b80-59c8-4a15-af02-d5957b9a08ef
+TAGS	aws:cloudformation:stack-id arn:aws:cloudformation:us-east-2:243575567843:stack/StackSet-org-enable-config-ce802b80-59c8-4a15-af02-d5957b9a08ef/07eefe90-264b-11ee-b43a-022237916e0b
+TAGS	aws:cloudformation:logical-id ConfigTopic
+arn:aws:s3:::cdk-hnb659fds-assets-243575567843-us-west-1
+TAGS	aws:cloudformation:stack-name CDKToolkit
+TAGS	aws:cloudformation:stack-id arn:aws:cloudformation:us-west-1:243575567843:stack/CDKToolkit/ec95bfe0-8afd-11ee-a6dc-0235fb89185b
+TAGS	aws:cloudformation:logical-id StagingBucket
+arn:aws:s3:::tw-merchant-content-svsus-us-west-norcal
+TAGS	App TW
+arn:aws:s3:::tw-merchant-content-svstest-us-west-norcal
+TAGS	App TW
+arn:aws:s3:::stackset-org-enable-config-0b2d5c4d-configbucket-17h2tk9zexv41
+TAGS	aws:cloudformation:stack-name StackSet-org-enable-config-0b2d5c4d-7121-4638-9d26-9bdadef1f2c3
+TAGS	aws:cloudformation:stack-id arn:aws:cloudformation:us-west-2:243575567843:stack/StackSet-org-enable-config-0b2d5c4d-7121-4638-9d26-9bdadef1f2c3/020f1690-264b-11ee-89b1-028a013248a9
+TAGS	aws:cloudformation:logical-id ConfigBucket
+arn:aws:sns:us-west-2:243575567843:config-topic-243575567843
+TAGS	aws:cloudformation:stack-name StackSet-org-enable-config-0b2d5c4d-7121-4638-9d26-9bdadef1f2c3
+TAGS	aws:cloudformation:stack-id arn:aws:cloudformation:us-west-2:243575567843:stack/StackSet-org-enable-config-0b2d5c4d-7121-4638-9d26-9bdadef1f2c3/020f1690-264b-11ee-89b1-028a013248a9
+TAGS	aws:cloudformation:logical-id ConfigTopic
