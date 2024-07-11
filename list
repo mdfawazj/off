@@ -201,12 +201,12 @@ for REGION in $REGIONS; do
         
         case "$RESOURCE_TYPE" in
             "lambda")
-                aws lambda list-functions --region "$REGION" --query 'Functions[*].[FunctionName, FunctionArn]' --output json |
-                jq -r '.[] | "Resource ARN: \(.[1])\nTags: \(try .[0].Tags // "No tags found")\n----------------"'
+                aws lambda list-functions --region "$REGION" --query 'Functions[*].[FunctionName, FunctionArn, Tags]' --output json |
+                jq -r '.[] | "Resource ARN: \(.[1])\nTags: \(if .[2] != null then .[2] else "No tags found" end)\n----------------"'
                 ;;
             "ec2")
                 aws ec2 describe-instances --region "$REGION" --query 'Reservations[*].Instances[*].[InstanceId, InstanceType, Tags[?Key==`Name`].Value | [0], Placement.AvailabilityZone]' --output json |
-                jq -r '.[][] | "Resource ID: \(.[0])\nResource Type: \(.[1])\nName: \(.[2])\nAvailability Zone: \(.[3])\n----------------"'
+                jq -r '.[][] | "Resource ID: \(.[0])\nResource Type: \(.[1])\nName: \(if .[2] then .[2] else "No name tag found" end)\nAvailability Zone: \(.[3])\n----------------"'
                 ;;
             "route53")
                 aws route53 list-hosted-zones --query 'HostedZones[*].[Name, Id]' --output json |
