@@ -22,12 +22,6 @@ ElastiCache
 ElasticSearch
 
 
-Resource ID/ARN: accountBalance-dev
-An error occurred (ValidationException) when calling the ListTagsForResource operation: One or more parameter value is invalid
-jq: error (at <stdin>:1): Cannot index array with string "Tags"
-No tags found.
-
-
 #!/bin/bash
 
 # Get a list of all AWS regions
@@ -66,23 +60,29 @@ for REGION in $REGIONS; do
         # Get the ARNs or identifiers of resources of the current type
         RESOURCE_IDENTIFIERS=$(aws configservice list-discovered-resources --resource-type "$RESOURCE_TYPE" --region $REGION --query "resourceIdentifiers[*]" --output json)
         
+        # Check if any resources were found
+        if [[ -z "$RESOURCE_IDENTIFIERS" ]]; then
+            echo "No resources found for type $RESOURCE_TYPE in region $REGION."
+            continue
+        fi
+        
         # Iterate over each resource
         for RESOURCE in $(echo "${RESOURCE_IDENTIFIERS}" | jq -c '.[]'); do
             RESOURCE_ARN=$(echo "$RESOURCE" | jq -r '.resourceArn // .resourceIdentifier')
             RESOURCE_ID=$(echo "$RESOURCE" | jq -r '.resourceId')
             
-            # Print resource ARN or ID
+            # Print resource ID/ARN
             echo "Resource ID/ARN: $RESOURCE_ID"
             
-            # Get tags for the resource
-            TAGS=$(aws configservice list-tags-for-resource --resource-arn "$RESOURCE_ARN" --region $REGION --output json || echo '[]')
+            # Attempt to get tags for the resource
+            TAGS=$(aws configservice list-tags-for-resource --resource-arn "$RESOURCE_ARN" --region $REGION --output json 2>/dev/null || echo '[]')
             
-            # Print tags if available
+            # Check if tags were retrieved successfully
             if [[ $(echo "$TAGS" | jq -r '.Tags | length') -gt 0 ]]; then
                 echo "Tags:"
                 echo "$TAGS"
             else
-                echo "No tags found."
+                echo "No tags found or error retrieving tags."
             fi
             
             echo "----------------"
