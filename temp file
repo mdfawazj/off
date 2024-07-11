@@ -57,3 +57,25 @@ TAGS	environment=dev
 TAGS	product=apple-vas
 TAGS	project=apple-vas-service
 TAGS	branch=master
+
+
+
+
+
+
+
+resource_type,resource_name,arn,region,account,aws:cloudformation:stack-name,aws:cloudformation:stack-id,aws:cloudformation:logical-id,App,environment,"	product","	project","	branch"
+s3,stackset-org-enable-config-2b68d41a-configbucket-oikovqysf3hh,arn:aws:s3:::stackset-org-enable-config-2b68d41a-configbucket-oikovqysf3hh,,,"	StackSet-org-enable-config-2b68d41a-1a44-42c5-bcd3-3f366a91c2f1","	arn:aws:cloudformation:ap-south-1:628913298676:stack/StackSet-org-enable-config-2b68d41a-1a44-42c5-bcd3-3f366a91c2f1/269ab5a0-264b-11ee-9406-024c8cd7537c",ConfigBucket,,,,,
+s3,cdk-hnb659fds-assets-628913298676-ap-south-1,arn:aws:s3:::cdk-hnb659fds-assets-628913298676-ap-south-1,,,,,,TW,,,,
+s3,cf-templates-12ht15q3gdz5i-ap-south-1,arn:aws:s3:::cf-templates-12ht15q3gdz5i-ap-south-1,,,,,,,,,,
+sns,config-topic-628913298676,arn:aws:sns:ap-south-1:628913298676:config-topic-628913298676,ap-south-1,628913298676,"	StackSet-org-enable-config-2b68d41a-1a44-42c5-bcd3-3f366a91c2f1","	arn:aws:cloudformation:ap-south-1:628913298676:stack/StackSet-org-enable-config-2b68d41a-1a44-42c5-bcd3-3f366a91c2f1/269ab5a0-264b-11ee-9406-024c8cd7537c",ConfigTopic,,,,,
+sns,config-topic-628913298676,arn:aws:sns:eu-west-1:628913298676:config-topic-628913298676,eu-west-1,628913298676,"	StackSet-org-enable-config-23df625b-9272-4ad3-9d2a-a321d40171d3","	arn:aws:cloudformation:eu-west-1:628913298676:stack/StackSet-org-enable-config-23df625b-9272-4ad3-9d2a-a321d40171d3/2607c470-264b-11ee-8bd1-064f5c45899f",ConfigTopic,,,,,
+s3,stackset-org-enable-config-23df625b-configbucket-1fxd8jq6fhg9r,arn:aws:s3:::stackset-org-enable-config-23df625b-configbucket-1fxd8jq6fhg9r,,,"	StackSet-org-enable-config-23df625b-9272-4ad3-9d2a-a321d40171d3","	arn:aws:cloudformation:eu-west-1:628913298676:stack/StackSet-org-enable-config-23df625b-9272-4ad3-9d2a-a321d40171d3/2607c470-264b-11ee-8bd1-064f5c45899f",ConfigBucket,,,,,
+sns,config-topic-628913298676,arn:aws:sns:sa-east-1:628913298676:config-topic-628913298676,sa-east-1,628913298676,"	StackSet-org-enable-config-813f0b7e-bc2a-4fb9-a10d-da606505ad10","	arn:aws:cloudformation:sa-east-1:628913298676:stack/StackSet-org-enable-config-813f0b7e-bc2a-4fb9-a10d-da606505ad10/e91f6bd0-264a-11ee-944c-0a0054e053f2",ConfigTopic,,,,,
+s3,stackset-org-enable-config-813f0b7e-configbucket-1bn9xn5jicek3,arn:aws:s3:::stackset-org-enable-config-813f0b7e-configbucket-1bn9xn5jicek3,,,"	StackSet-org-enable-config-813f0b7e-bc2a-4fb9-a10d-da606505ad10","	arn:aws:cloudformation:sa-east-1:628913298676:stack/StackSet-org-enable-config-813f0b7e-bc2a-4fb9-a10d-da606505ad10/e91f6bd0-264a-11ee-944c-0a0054e053f2",ConfigBucket,,,,,
+sns,config-topic-628913298676,arn:aws:sns:ap-southeast-1:628913298676:config-topic-628913298676,ap-southeast-1,628913298676,"	StackSet-org-enable-config-7f1a46f3-7a0f-4abb-bb50-a436de674a43","	arn:aws:cloudformation:ap-southeast-1:628913298676:stack/StackSet-org-enable-config-7f1a46f3-7a0f-4abb-bb50-a436de674a43/4d0aa510-264b-11ee-a28c-060c52e5165a",ConfigTopic,,,,,
+sns,config-topic-628913298676,arn:aws:sns:ap-southeast-2:628913298676:config-topic-628913298676,ap-southeast-2,628913298676,"	StackSet-org-enable-config-4484d9cb-124f-4e93-a688-1f927e5d561c","	arn:aws:cloudformation:ap-southeast-2:628913298676:stack/StackSet-org-enable-config-4484d9cb-124f-4e93-a688-1f927e5d561c/d86028c0-264a-11ee-a6a1-0a19d85330be",ConfigTopic,,,,,
+s3,stackset-org-enable-config-f9cc7ec8-configbucket-o3o2f09cts6d,arn:aws:s3:::stackset-org-enable-config-f9cc7ec8-configbucket-o3o2f09cts6d,,,"	StackSet-org-enable-config-f9cc7ec8-c448-409a-a982-c0875dde564b","	arn:aws:cloudformation:eu-central-1:628913298676:stack/StackSet-org-enable-config-f9cc7ec8-c448-409a-a982-c0875dde564b/0ce80900-264b-11ee-9558-0aec439e3386",ConfigBucket,,,,,
+sns,config-topic-628913298676,arn:aws:sns:eu-central-1:628913298676:config-topic-628913298676,eu-central-1,628913298676,"	StackSet-org-enable-config-f9cc7ec8-c448-409a-a982-c0875dde564b","	arn:aws:cloudformation:eu-central-1:628913298676:stack/StackSet-org-enable-config-f9cc7ec8-c448-409a-a982-c0875dde564b/0ce80900-264b-11ee-9558-0aec439e3386",ConfigTopic,,,,,
+dynamodb,table/applications-dev,arn:aws:dynamodb:us-east-1:628913298676:table/applications-dev,us-east-1,628913298676,,,,,,,,
+dynamodb,table/apple-vas-keypair-dev,arn:aws:dynamodb:us-east-1:628913298676:table/apple-vas-keypair-dev,us-east-1,628913298676,,,,,dev,apple-vas,apple-vas-service,master
