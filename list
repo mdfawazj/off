@@ -22,6 +22,12 @@ ElastiCache
 ElasticSearch
 
 
+Resource ID/ARN: accountBalance-dev
+An error occurred (ValidationException) when calling the ListTagsForResource operation: One or more parameter value is invalid
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found.
+
+
 #!/bin/bash
 
 # Get a list of all AWS regions
