@@ -278,3 +278,44 @@ for REGION in $REGIONS; do
         esac
     done
 done
+
+
+
+
+
+
+
+#!/bin/bash
+
+# Define AWS regions you want to query
+REGIONS=$(aws ec2 describe-regions --query 'Regions[*].RegionName' --output json | jq -r '.[]')
+
+# Loop through each region
+for REGION in $REGIONS; do
+    echo "Region: $REGION"
+    
+    # List Lambda functions in the region
+    FUNCTIONS=$(aws lambda list-functions --region "$REGION" --query 'Functions[*].[FunctionName, FunctionArn]' --output json)
+    
+    # Iterate over each Lambda function
+    for FUNCTION in $(echo "$FUNCTIONS" | jq -c '.[]'); do
+        FUNCTION_NAME=$(echo "$FUNCTION" | jq -r '.[0]')
+        FUNCTION_ARN=$(echo "$FUNCTION" | jq -r '.[1]')
+        
+        echo "Lambda Function Name: $FUNCTION_NAME"
+        echo "Lambda Function ARN: $FUNCTION_ARN"
+        
+        # Fetch tags for the Lambda function
+        TAGS=$(aws lambda list-tags --resource "$FUNCTION_ARN" --region "$REGION" --query 'Tags' --output json)
+        
+        # Check if tags were retrieved successfully
+        if [[ $(echo "$TAGS" | jq -r 'length') -gt 0 ]]; then
+            echo "Tags:"
+            echo "$TAGS"
+        else
+            echo "No tags found for $FUNCTION_NAME"
+        fi
+        
+        echo "----------------"
+    done
+done
