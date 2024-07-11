@@ -1,0 +1,59 @@
+arn:aws:s3:::stackset-org-enable-config-2b68d41a-configbucket-oikovqysf3hh
+TAGS	aws:cloudformation:stack-name=StackSet-org-enable-config-2b68d41a-1a44-42c5-bcd3-3f366a91c2f1
+TAGS	aws:cloudformation:stack-id=arn:aws:cloudformation:ap-south-1:628913298676:stack/StackSet-org-enable-config-2b68d41a-1a44-42c5-bcd3-3f366a91c2f1/269ab5a0-264b-11ee-9406-024c8cd7537c
+TAGS	aws:cloudformation:logical-id=ConfigBucket
+arn:aws:s3:::cdk-hnb659fds-assets-628913298676-ap-south-1
+TAGS	App=TW
+arn:aws:s3:::cf-templates-12ht15q3gdz5i-ap-south-1
+TAGS	App=
+arn:aws:sns:ap-south-1:628913298676:config-topic-628913298676
+TAGS	aws:cloudformation:stack-name=StackSet-org-enable-config-2b68d41a-1a44-42c5-bcd3-3f366a91c2f1
+TAGS	aws:cloudformation:stack-id=arn:aws:cloudformation:ap-south-1:628913298676:stack/StackSet-org-enable-config-2b68d41a-1a44-42c5-bcd3-3f366a91c2f1/269ab5a0-264b-11ee-9406-024c8cd7537c
+TAGS	aws:cloudformation:logical-id=ConfigTopic
+arn:aws:sns:eu-west-1:628913298676:config-topic-628913298676
+TAGS	aws:cloudformation:stack-name=StackSet-org-enable-config-23df625b-9272-4ad3-9d2a-a321d40171d3
+TAGS	aws:cloudformation:stack-id=arn:aws:cloudformation:eu-west-1:628913298676:stack/StackSet-org-enable-config-23df625b-9272-4ad3-9d2a-a321d40171d3/2607c470-264b-11ee-8bd1-064f5c45899f
+TAGS	aws:cloudformation:logical-id=ConfigTopic
+arn:aws:s3:::stackset-org-enable-config-23df625b-configbucket-1fxd8jq6fhg9r
+TAGS	aws:cloudformation:stack-name=StackSet-org-enable-config-23df625b-9272-4ad3-9d2a-a321d40171d3
+TAGS	aws:cloudformation:stack-id=arn:aws:cloudformation:eu-west-1:628913298676:stack/StackSet-org-enable-config-23df625b-9272-4ad3-9d2a-a321d40171d3/2607c470-264b-11ee-8bd1-064f5c45899f
+TAGS	aws:cloudformation:logical-id=ConfigBucket
+arn:aws:sns:sa-east-1:628913298676:config-topic-628913298676
+TAGS	aws:cloudformation:stack-name=StackSet-org-enable-config-813f0b7e-bc2a-4fb9-a10d-da606505ad10
+TAGS	aws:cloudformation:stack-id=arn:aws:cloudformation:sa-east-1:628913298676:stack/StackSet-org-enable-config-813f0b7e-bc2a-4fb9-a10d-da606505ad10/e91f6bd0-264a-11ee-944c-0a0054e053f2
+TAGS	aws:cloudformation:logical-id=ConfigTopic
+arn:aws:s3:::stackset-org-enable-config-813f0b7e-configbucket-1bn9xn5jicek3
+TAGS	aws:cloudformation:stack-name=StackSet-org-enable-config-813f0b7e-bc2a-4fb9-a10d-da606505ad10
+TAGS	aws:cloudformation:stack-id=arn:aws:cloudformation:sa-east-1:628913298676:stack/StackSet-org-enable-config-813f0b7e-bc2a-4fb9-a10d-da606505ad10/e91f6bd0-264a-11ee-944c-0a0054e053f2
+TAGS	aws:cloudformation:logical-id=ConfigBucket
+arn:aws:s3:::stackset-org-enable-config-7f1a46f3-configbucket-1j6d8b54r8ysp
+TAGS	aws:cloudformation:stack-name=StackSet-org-enable-config-7f1a46f3-7a0f-4abb-bb50-a436de674a43
+TAGS	aws:cloudformation:stack-id=arn:aws:cloudformation:ap-southeast-1:628913298676:stack/StackSet-org-enable-config-7f1a46f3-7a0f-4abb-bb50-a436de674a43/4d0aa510-264b-11ee-a28c-060c52e5165a
+TAGS	aws:cloudformation:logical-id=ConfigBucket
+arn:aws:sns:ap-southeast-1:628913298676:config-topic-628913298676
+TAGS	aws:cloudformation:stack-name=StackSet-org-enable-config-7f1a46f3-7a0f-4abb-bb50-a436de674a43
+TAGS	aws:cloudformation:stack-id=arn:aws:cloudformation:ap-southeast-1:628913298676:stack/StackSet-org-enable-config-7f1a46f3-7a0f-4abb-bb50-a436de674a43/4d0aa510-264b-11ee-a28c-060c52e5165a
+TAGS	aws:cloudformation:logical-id=ConfigTopic
+arn:aws:sns:ap-southeast-2:628913298676:config-topic-628913298676
+TAGS	aws:cloudformation:stack-name=StackSet-org-enable-config-4484d9cb-124f-4e93-a688-1f927e5d561c
+TAGS	aws:cloudformation:stack-id=arn:aws:cloudformation:ap-southeast-2:628913298676:stack/StackSet-org-enable-config-4484d9cb-124f-4e93-a688-1f927e5d561c/d86028c0-264a-11ee-a6a1-0a19d85330be
+TAGS	aws:cloudformation:logical-id=ConfigTopic
+arn:aws:s3:::stackset-org-enable-config-4484d9cb-configbucket-11qsszap34bur
+TAGS	aws:cloudformation:stack-name=StackSet-org-enable-config-4484d9cb-124f-4e93-a688-1f927e5d561c
+TAGS	aws:cloudformation:stack-id=arn:aws:cloudformation:ap-southeast-2:628913298676:stack/StackSet-org-enable-config-4484d9cb-124f-4e93-a688-1f927e5d561c/d86028c0-264a-11ee-a6a1-0a19d85330be
+TAGS	aws:cloudformation:logical-id=ConfigBucket
+arn:aws:s3:::stackset-org-enable-config-f9cc7ec8-configbucket-o3o2f09cts6d
+TAGS	aws:cloudformation:stack-name=StackSet-org-enable-config-f9cc7ec8-c448-409a-a982-c0875dde564b
+TAGS	aws:cloudformation:stack-id=arn:aws:cloudformation:eu-central-1:628913298676:stack/StackSet-org-enable-config-f9cc7ec8-c448-409a-a982-c0875dde564b/0ce80900-264b-11ee-9558-0aec439e3386
+TAGS	aws:cloudformation:logical-id=ConfigBucket
+arn:aws:sns:eu-central-1:628913298676:config-topic-628913298676
+TAGS	aws:cloudformation:stack-name=StackSet-org-enable-config-f9cc7ec8-c448-409a-a982-c0875dde564b
+TAGS	aws:cloudformation:stack-id=arn:aws:cloudformation:eu-central-1:628913298676:stack/StackSet-org-enable-config-f9cc7ec8-c448-409a-a982-c0875dde564b/0ce80900-264b-11ee-9558-0aec439e3386
+TAGS	aws:cloudformation:logical-id=ConfigTopic
+arn:aws:dynamodb:us-east-1:628913298676:table/applications-dev
+TAGS	App=
+arn:aws:dynamodb:us-east-1:628913298676:table/apple-vas-keypair-dev
+TAGS	environment=dev
+TAGS	product=apple-vas
+TAGS	project=apple-vas-service
+TAGS	branch=master
