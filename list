@@ -22,10 +22,13 @@ ElastiCache
 ElasticSearch
 
 
-#!/bin/bash
+ #!/bin/bash
+#  set -x
+
+jq="C:/Users/F37YHCS/jq/jq.exe"
 
 # Get a list of all AWS regions
-REGIONS=$(aws ec2 describe-regions --query "Regions[*].RegionName" --output text)
+REGIONS="us-east-1"
 
 # Define the list of resource types
 RESOURCE_TYPES=(
@@ -58,7 +61,7 @@ for REGION in $REGIONS; do
         echo "Listing resources for type: $RESOURCE_TYPE"
         
         # Get the ARNs or identifiers of resources of the current type
-        RESOURCE_IDENTIFIERS=$(aws configservice list-discovered-resources --resource-type "$RESOURCE_TYPE" --region $REGION --query "resourceIdentifiers[*]" --output json)
+        RESOURCE_IDENTIFIERS=$(aws configservice list-discovered-resources --resource-type "$RESOURCE_TYPE" --region $REGION --query "resourceIdentifiers[*]" --no-verify-ssl --output json)
         
         # Check if any resources were found
         if [[ -z "$RESOURCE_IDENTIFIERS" ]]; then
@@ -67,18 +70,18 @@ for REGION in $REGIONS; do
         fi
         
         # Iterate over each resource
-        for RESOURCE in $(echo "${RESOURCE_IDENTIFIERS}" | jq -c '.[]'); do
-            RESOURCE_ARN=$(echo "$RESOURCE" | jq -r '.resourceArn // .resourceIdentifier')
-            RESOURCE_ID=$(echo "$RESOURCE" | jq -r '.resourceId')
+        for RESOURCE in $(echo "${RESOURCE_IDENTIFIERS}" | $jq -c '.[]'); do
+            RESOURCE_ARN=$(echo "$RESOURCE" | $jq -r '.resourceArn // .resourceIdentifier')
+            RESOURCE_ID=$(echo "$RESOURCE" | $jq -r '.resourceId')
             
             # Print resource ID/ARN
-            echo "Resource ID/ARN: $RESOURCE_ID"
+            echo "Resource ID/ARN: $RESOURCE_ID / $RESOURCE_ARN"
             
             # Attempt to get tags for the resource
-            TAGS=$(aws configservice list-tags-for-resource --resource-arn "$RESOURCE_ARN" --region $REGION --output json 2>/dev/null || echo '[]')
+            TAGS=$(aws configservice list-tags-for-resource --resource-arn "$RESOURCE_ARN" --region $REGION --no-verify-ssl --output json 2>/dev/null || echo '[]')
             
             # Check if tags were retrieved successfully
-            if [[ $(echo "$TAGS" | jq -r '.Tags | length') -gt 0 ]]; then
+            if [[ $(echo "$TAGS" | $jq -r '.Tags | length') -gt 0 ]]; then
                 echo "Tags:"
                 echo "$TAGS"
             else
@@ -89,3 +92,154 @@ for REGION in $REGIONS; do
         done
     done
 done
+
+
+esource ID/ARN: Authorizer-dev / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: Authorizer-previews / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: AwsCdkOpenSearchStack-AWS679f53fac002430cb0da5b798-YpN5fPe2JGWh / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: CdkAwsOpenSearchStack-AWS679f53fac002430cb0da5b798-H71ap3HY47qq / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: CdkAwsOpenSearchStack-AWS679f53fac002430cb0da5b798-PF2vhUsCYKpj / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: CognitoAuthTest / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: ConfigurationAPI-dev-Api-LogRetentionaae0aa3c5b4d4-LqPGTBKNGFly / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: GSGCertAPIStack-LogRetentionaae0aa3c5b4d4f87b02d85-BJSI5IC6BBPB / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: GenericCognitoTriggersSta-LogRetentionaae0aa3c5b4d-JSAX1T5IGTLK / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: GyftMarketReviewLambdaUse-LogRetentionaae0aa3c5b4d-540I383S4RRZ / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: GyftMarketReviewdevLambda-LogRetentionaae0aa3c5b4d-173BGNAZO5SXE / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: HttpRequestProxyService-dev--APIMyFunction4D379249-QNESj4N4rhNi / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: HttpRequestProxyService-exp--APIMyFunction4D379249-G3fpcQ5xOonO / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: LogsToElasticsearch-ops-blame / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: LogsToElasticsearch_gsg-blame / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: MMB-ElasticSearch-Testing-Lambda / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: MMPOpenSearchStack-dev-AWS679f53fac002430cb0da5b79-DAgOypUBtt8E / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: Mani-Python-Testing / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: ParamStoreLambda-LogRetentionaae0aa3c5b4d4f87b02d8-1OIACVZGMQTSQ / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: Postgres-connect-RDS / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: RDS-Kinesis-Stream-OpenSearch-Test / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: S3_Ijson_Test / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: TestDynamoStream / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: Test_Function / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: Testing-Mani-Node / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: TwConf-exp / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: TwConf-exp-LogRetentionaae0aa3c5b4d4f87b02d85b201e-GR1zonI655xf / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: XMsgDevStack-AWS679f53fac002430cb0da5b7982bd22872D-u3GfJmdrfM6z / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: XMsgDevStack-LogRetentionaae0aa3c5b4d4f87b02d85b20-ODg6oYoUtTb0 / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: Xshipping_Listener / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: accept-deny-gyft-user / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: accountBalance-dev / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: accountBalance-previews / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: amplify-catalogmobileapp--UpdateRolesWithIDPFuncti-gzEzmdK722th / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: amplify-catalogmobileapp-stag-UserPoolClientLambda-J4zM5pY3S5K9 / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: amplify-login-create-auth-challenge-00b5dfb9 / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: amplify-login-create-auth-challenge-0b0dce20 / null
+jq: error (at <stdin>:1): Cannot index array with string "Tags"
+No tags found or error retrieving tags.
+----------------
+Resource ID/ARN: amplify-login-create-auth-challenge-0b6b7465 / n
