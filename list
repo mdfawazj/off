@@ -20,3 +20,66 @@ DMS
 Secrets Manager
 ElastiCache
 ElasticSearch
+
+
+#!/bin/bash
+
+# Get a list of all AWS regions
+REGIONS=$(aws ec2 describe-regions --query "Regions[*].RegionName" --output text)
+
+# Define the list of resource types
+RESOURCE_TYPES=(
+    "AWS::Lambda::Function"
+    "AWS::EC2::Instance"
+    "AWS::Route53::HostedZone"
+    "AWS::ElasticLoadBalancingV2::LoadBalancer"
+    "AWS::ECS::Cluster"
+    "AWS::ECR::Repository"
+    "AWS::S3::Bucket"
+    "AWS::ElasticBeanstalk::Environment"
+    "AWS::RDS::DBCluster"  # Aurora RDS
+    "AWS::DynamoDB::Table"
+    "AWS::SNS::Topic"
+    "AWS::SMS::App"
+    "AWS::SQS::Queue"
+    "AWS::Redshift::Cluster"
+    "AWS::DMS::ReplicationInstance"
+    "AWS::SecretsManager::Secret"
+    "AWS::ElastiCache::CacheCluster"
+    "AWS::Elasticsearch::Domain"
+)
+
+# Loop through each region
+for REGION in $REGIONS; do
+    echo "Region: $REGION"
+    
+    # Loop through each resource type
+    for RESOURCE_TYPE in "${RESOURCE_TYPES[@]}"; do
+        echo "Listing resources for type: $RESOURCE_TYPE"
+        
+        # Get the ARNs or identifiers of resources of the current type
+        RESOURCE_IDENTIFIERS=$(aws configservice list-discovered-resources --resource-type "$RESOURCE_TYPE" --region $REGION --query "resourceIdentifiers[*]" --output json)
+        
+        # Iterate over each resource
+        for RESOURCE in $(echo "${RESOURCE_IDENTIFIERS}" | jq -c '.[]'); do
+            RESOURCE_ARN=$(echo "$RESOURCE" | jq -r '.resourceArn // .resourceIdentifier')
+            RESOURCE_ID=$(echo "$RESOURCE" | jq -r '.resourceId')
+            
+            # Print resource ARN or ID
+            echo "Resource ID/ARN: $RESOURCE_ID"
+            
+            # Get tags for the resource
+            TAGS=$(aws configservice list-tags-for-resource --resource-arn "$RESOURCE_ARN" --region $REGION --output json || echo '[]')
+            
+            # Print tags if available
+            if [[ $(echo "$TAGS" | jq -r '.Tags | length') -gt 0 ]]; then
+                echo "Tags:"
+                echo "$TAGS"
+            else
+                echo "No tags found."
+            fi
+            
+            echo "----------------"
+        done
+    done
+done
