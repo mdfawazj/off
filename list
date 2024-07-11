@@ -319,3 +319,54 @@ for REGION in $REGIONS; do
         echo "----------------"
     done
 done
+
+
+
+
+
+Lambda Function Name: gsg-api-auth-es6
+Lambda Function ARN: arn:aws:lambda:us-east-1:628913298676:function:gsg-api-auth-es6
+urllib3\connectionpool.py:1056: InsecureRequestWarning: Unverified HTTPS request is being made to host 'lambda.us-east-1.amazonaws.com'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/1.26.x/advanced-usage.html#ssl-warnings
+Tags:
+{
+    "aws:cloudformation:logical-id": "GSGAuthenticationFunction",
+    "aws:cloudformation:stack-id": "arn:aws:cloudformation:us-east-1:628913298676:stack/gsg-sv-pre-token-trigger-es6-sandbox/3be43120-aae4-11ee-97a3-0aad99c94c57",
+    "aws:cloudformation:stack-name": "gsg-sv-pre-token-trigger-es6-sandbox",
+    "lambda:createdBy": "SAM"
+}
+----------------
+Lambda Function Name: amplify-login-verify-auth-challenge-78190fb8
+Lambda Function ARN: arn:aws:lambda:us-east-1:628913298676:function:amplify-login-verify-auth-challenge-78190fb8
+urllib3\connectionpool.py:1056: InsecureRequestWarning: Unverified HTTPS request is being made to host 'lambda.us-east-1.amazonaws.com'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/1.26.x/advanced-usage.html#ssl-warnings
+No tags found for amplify-login-verify-auth-challenge-78190fb8
+----------------
+Lambda Function Name: gsg-certification-list-tests-dev
+Lambda Function ARN: arn:aws:lambda:us-east-1:628913298676:function:gsg-certification-list-tests-dev
+urllib3\connectionpool.py:1056: InsecureRequestWarning: Unverified HTTPS request is being made to host 'lambda.us-east-1.amazonaws.com'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/1.26.x/advanced-usage.html#ssl-warnings
+Tags:
+{
+    "author": "jcox",
+    "aws:cloudformation:logical-id": "gsgcertificationlisttestsdev723E500A",
+    "aws:cloudformation:stack-id": "arn:aws:cloudformation:us-east-1:628913298676:stack/GSGCertAPIStack/d63a7880-cabc-11ea-ac3e-0ed24b955b13",
+    "aws:cloudformation:stack-name": "GSGCertAPIStack",
+    "created": "2020-07-27 17:16:51",
+    "gsg-version": "Compatible with GSG version 2020.05",
+    "product": "GSG Certification APIs"
+}
+----------------
+Lambda Function Name: common-user-management-api-users
+Lambda Function ARN: arn:aws:lambda:us-east-1:628913298676:function:common-user-management-api-users
+urllib3\connectionpool.py:1056: InsecureRequestWarning: Unverified HTTPS request is being made to host 'lambda.us-east-1.amazonaws.com'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/1.26.x/advanced-usage.html#ssl-warnings
+No tags found for common-user-management-api-users
+----------------
+Lambda Function Name: userDetails-rest
+Lambda Function ARN: arn:aws:lambda:us-east-1:628913298676:function:userDetails-rest
+urllib3\connectionpool.py:1056: InsecureRequestWarning: Unverified HTTPS request is being made to host 'lambda.us-east-1.amazonaws.com'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/1.26.x/advanced-usage.html#ssl-warnings
+Tags:
+{
+    "aws:cloudformation:logical-id": "LambdaFunction",
+    "aws:cloudformation:stack-id": "arn:aws:cloudformation:us-east-1:628913298676:stack/amplify-merchantportalnonpro-rest-231253-functionuserDetails-FJF0MSZ5E8BB/49308b30-de42-11ee-87ca-12927bb94b9f",
+    "aws:cloudformation:stack-name": "amplify-merchantportalnonpro-rest-231253-functionuserDetails-FJF0MSZ5E8BB",
+    "user:Application": "merchantportalnonpro",
+    "user:Stack": "rest"
+}
