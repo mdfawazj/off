@@ -1,0 +1,21 @@
+arn:aws:sns:eu-central-1:628913298676:config-topic-628913298676 
+TAGS aws:cloudformation:stack-name=StackSet-org-enable-config-f9cc7ec8-c448-409a-a982-c0875dde564b 
+TAGS environment=test
+TAGS aws:cloudformation:stack-id=arn:aws:cloudformation:eu-central-1:628913298676:stack/StackSet-org-enable-config-f9cc7ec8-c448-409a-a982-c0875dde564b/0ce80900-264b-11ee-9558-0aec439e3386
+TAGS aws:cloudformation:logical-id=ConfigTopic 
+arn:aws:dynamodb:us-east-1:628913298676:table/applications-dev 
+TAGS App= 
+TAGS environment=200
+arn:aws:dynamodb:us-east-1:628913298676:table/apple-vas-keypair-dev 
+TAGS environment=dev 
+TAGS product=apple-vas 
+TAGS App=apple-vas-service 
+TAGS branch=master
+
+I want a script to read the file that have this data and give me a csv file where the first row will be like 
+
+In row 1 column heading will be like  column 1 Resource_type column 2 Resource_Name column 3 Resource_ARN column 4 environment column 5 product column 6 cd::App.
+
+Then start reading file, if the line starts with arn then, in new row start populating values for the columns headings in second row for the 1st column (Resource_type) value will be in between 2nd and 3rd : of arn line, value for second column (Resource_Name) will be after last :  , value for art will be line of arn 
+
+If line starts with TAGS then 
