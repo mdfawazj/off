@@ -21,6 +21,8 @@ Secrets Manager
 ElastiCache
 ElasticSearch
 
+lambda:function ec2:instance route53:domain elasticloadbalancing:loadbalancer ecs:cluster ecr:repository s3:bucket elasticbeanstalk:application rds:cluster rds:db dynamodb:table sns:topic sqs:queue redshift:cluster dms:replication-task secretsmanager:secret elasticache:cluster es:domain
+
 
  #!/bin/bash
 #  set -x
