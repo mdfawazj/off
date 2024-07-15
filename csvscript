@@ -1,0 +1,49 @@
+create_CSV_file () {
+    echo "creating CSV file"
+    output_file="temp_output"
+    output_file2="final_output.csv"
+
+    # Remove existing final_output2.csv if it exists
+    if [ -f "$output_file2" ]; then
+        echo "resource_type,resource_name,arn,region,account,tags_line" > "$output_file2"
+        else 
+        echo "resource_type,resource_name,arn,region,account,tags_line" > "$output_file2"
+    fi
+
+    # Initialize variables to store values
+    arn=""
+    resource_type=""
+    region=""
+    account=""
+    resource_name=""
+    tags_line=""
+
+    # Read each line from temp_output
+    while IFS= read -r line; do
+        if [[ $line == arn* ]]; then
+            if [ -n "$arn" ]; then
+                # Append accumulated values to the previous ARN line
+                echo "$resource_type,$resource_name,$arn,$region,$account $tags_line" >> "$output_file2"
+            fi
+            IFS=':' read -r -a arr <<<"$line"
+            resource_type="${arr[2]}"
+            region="${arr[3]}"
+            account="${arr[4]}"
+            resource_name="${arr[-1]}"
+            arn="$line"
+            tags_line=""
+        elif [[ $line == TAGS* ]]; then
+            tags_line+="$(echo "$line" | sed 's/TAGS/,/') "
+        fi
+    done < "$output_file"
+
+    # Append the last ARN line along with accumulated tags
+    if [ -n "$arn" ]; then
+        echo "$resource_type,$resource_name,$arn,$region,$account $tags_line" >> "$output_file2"
+    fi
+    account=$(aws sts get-caller-identity --query "Account" --output text --no-verify-ssl)
+    echo "Running filter"
+    cat final_output.csv |grep -v "App TW" > $account.filtered.csv
+    mv final_output.csv $account.csv
+    echo $account_filtered.csv $account.csv
+}
