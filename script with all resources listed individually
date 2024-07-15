@@ -19,7 +19,14 @@ list_and_tag_resources() {
 
   for resource in $resources; do
     echo "$resource_type: $resource"
-    eval "$tag_command $resource_id_key $resource"
+    tags=$(eval "$tag_command $resource_id_key $resource --output json" | jq -r '.Tags[]? | "\(.Key): \(.Value)"')
+    if [ -n "$tags" ]; then
+      echo "Tags:"
+      echo "$tags" | sed 's/^/  /'
+    else
+      echo "No tags found."
+    fi
+    echo
   done
 }
 
