@@ -1,0 +1,132 @@
+#!/bin/bash
+
+# Ensure jq is installed
+if ! command -v jq &> /dev/null; then
+  echo "jq could not be found. Installing jq..."
+  sudo apt-get install jq -y
+fi
+
+# List and tag resources function
+list_and_tag_resources() {
+  local resource_type=$1
+  local list_command=$2
+  local list_query=$3
+  local tag_command=$4
+  local resource_id_key=$5
+
+  echo "Listing $resource_type..."
+  resources=$(eval "$list_command --query \"$list_query\" --output json" | jq -r ".[]")
+
+  for resource in $resources; do
+    echo "$resource_type: $resource"
+    eval "$tag_command $resource_id_key $resource"
+  done
+}
+
+# Lambda Functions
+list_and_tag_resources "Lambda Function" \
+  "aws lambda list-functions" \
+  "Functions[*].FunctionArn" \
+  "aws lambda list-tags --resource" ""
+
+# EC2 Instances
+list_and_tag_resources "EC2 Instance" \
+  "aws ec2 describe-instances" \
+  "Reservations[*].Instances[*].InstanceId" \
+  "aws ec2 describe-tags --filters Name=resource-id,Values" ""
+
+# Route 53 Domains
+list_and_tag_resources "Route 53 Domain" \
+  "aws route53domains list-domains" \
+  "Domains[*].DomainName" \
+  "aws route53domains get-domain-detail --domain-name" ""
+
+# Elastic Load Balancers
+list_and_tag_resources "Elastic Load Balancer" \
+  "aws elb describe-load-balancers" \
+  "LoadBalancerDescriptions[*].LoadBalancerName" \
+  "aws elb describe-tags --load-balancer-names" "--load-balancer-names"
+
+# ECS Clusters
+list_and_tag_resources "ECS Cluster" \
+  "aws ecs list-clusters" \
+  "clusterArns" \
+  "aws ecs list-tags-for-resource --resource-arn" ""
+
+# ECR Repositories
+list_and_tag_resources "ECR Repository" \
+  "aws ecr describe-repositories" \
+  "repositories[*].repositoryArn" \
+  "aws ecr list-tags-for-resource --resource-arn" ""
+
+# S3 Buckets
+list_and_tag_resources "S3 Bucket" \
+  "aws s3api list-buckets" \
+  "Buckets[*].Name" \
+  "aws s3api get-bucket-tagging --bucket" ""
+
+# Elastic Beanstalk Applications
+list_and_tag_resources "Elastic Beanstalk Application" \
+  "aws elasticbeanstalk describe-applications" \
+  "Applications[*].ApplicationArn" \
+  "aws elasticbeanstalk list-tags-for-resource --resource-arn" ""
+
+# RDS Clusters
+list_and_tag_resources "RDS Cluster" \
+  "aws rds describe-db-clusters" \
+  "DBClusters[*].DBClusterArn" \
+  "aws rds list-tags-for-resource --resource-name" ""
+
+# RDS Instances
+list_and_tag_resources "RDS Instance" \
+  "aws rds describe-db-instances" \
+  "DBInstances[*].DBInstanceArn" \
+  "aws rds list-tags-for-resource --resource-name" ""
+
+# DynamoDB Tables
+list_and_tag_resources "DynamoDB Table" \
+  "aws dynamodb list-tables" \
+  "TableNames[*]" \
+  "aws dynamodb list-tags-of-resource --resource-arn arn:aws:dynamodb:$(aws configure get region):$(aws sts get-caller-identity --query Account --output text):table" ""
+
+# SNS Topics
+list_and_tag_resources "SNS Topic" \
+  "aws sns list-topics" \
+  "Topics[*].TopicArn" \
+  "aws sns list-tags-for-resource --resource-arn" ""
+
+# SQS Queues
+list_and_tag_resources "SQS Queue" \
+  "aws sqs list-queues" \
+  "QueueUrls[*]" \
+  "aws sqs list-queue-tags --queue-url" ""
+
+# Redshift Clusters
+list_and_tag_resources "Redshift Cluster" \
+  "aws redshift describe-clusters" \
+  "Clusters[*].ClusterIdentifier" \
+  "aws redshift describe-tags --resource-name arn:aws:redshift:$(aws configure get region):$(aws sts get-caller-identity --query Account --output text):cluster" ""
+
+# DMS Replication Tasks
+list_and_tag_resources "DMS Replication Task" \
+  "aws dms describe-replication-tasks" \
+  "ReplicationTasks[*].ReplicationTaskArn" \
+  "aws dms list-tags-for-resource --resource-arn" ""
+
+# Secrets Manager Secrets
+list_and_tag_resources "Secrets Manager Secret" \
+  "aws secretsmanager list-secrets" \
+  "SecretList[*].ARN" \
+  "aws secretsmanager list-secret-version-ids --secret-id" ""
+
+# ElastiCache Clusters
+list_and_tag_resources "ElastiCache Cluster" \
+  "aws elasticache describe-cache-clusters" \
+  "CacheClusters[*].CacheClusterId" \
+  "aws elasticache list-tags-for-resource --resource-name arn:aws:elasticache:$(aws configure get region):$(aws sts get-caller-identity --query Account --output text):cluster" ""
+
+# Elasticsearch Domains
+list_and_tag_resources "Elasticsearch Domain" \
+  "aws es list-domain-names" \
+  "DomainNames[*].DomainName" \
+  "aws es list-tags --arn arn:aws:es:$(aws configure get region):$(aws sts get-caller-identity --query Account --output text):domain" "--arn arn:aws:es:$(aws configure get region):$(aws sts get-caller-identity --query Account --output text):domain"
