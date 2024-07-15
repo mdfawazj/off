@@ -15,11 +15,14 @@ list_and_tag_resources() {
   local resource_id_key=$5
 
   echo "Listing $resource_type..."
-  resources=$(eval "$list_command --query \"$list_query\" --output json" | jq -r ".[]")
+  resource_json=$(eval "$list_command --query \"$list_query\" --output json")
+  resources=$(echo "$resource_json" | jq -r ".[]")
 
   for resource in $resources; do
     echo "$resource_type: $resource"
-    tags=$(eval "$tag_command $resource_id_key $resource --output json" | jq -r '.Tags[]? | "\(.Key): \(.Value)"')
+    tag_json=$(eval "$tag_command $resource_id_key $resource --output json")
+    tags=$(echo "$tag_json" | jq -r '.Tags[]? | "\(.Key): \(.Value)"')
+
     if [ -n "$tags" ]; then
       echo "Tags:"
       echo "$tags" | sed 's/^/  /'
