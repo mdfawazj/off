@@ -5125,3 +5125,394 @@ Traceback (most recent call last):
   File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\client.py", line 918, in __getattr__
     raise AttributeError(
 AttributeError: 'Lambda' object has no attribute 'list_tags_for_resource'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import boto3
+import csv
+from botocore.exceptions import ClientError
+
+# Define the regions to process
+regions = ['us-east-1', 'us-west-1']  # Add more regions as needed
+
+# Initialize clients for each region
+clients = {region: {
+    'ec2': boto3.client('ec2', region_name=region, verify=False),
+    'rds': boto3.client('rds', region_name=region, verify=False),
+    'lambda': boto3.client('lambda', region_name=region, verify=False),
+    'elb': boto3.client('elb', region_name=region, verify=False),
+    'elbv2': boto3.client('elbv2', region_name=region, verify=False),
+    'ecs': boto3.client('ecs', region_name=region, verify=False),
+    'dynamodb': boto3.client('dynamodb', region_name=region, verify=False),
+    'sns': boto3.client('sns', region_name=region, verify=False),
+    'sqs': boto3.client('sqs', region_name=region, verify=False),
+    'redshift': boto3.client('redshift', region_name=region, verify=False),
+    'dms': boto3.client('dms', region_name=region, verify=False),
+    'secretsmanager': boto3.client('secretsmanager', region_name=region, verify=False),
+    'elasticache': boto3.client('elasticache', region_name=region, verify=False),
+    'es': boto3.client('es', region_name=region, verify=False),
+    'elasticbeanstalk': boto3.client('elasticbeanstalk', region_name=region, verify=False),
+    's3': boto3.client('s3', region_name=region, verify=False),
+    'ecr': boto3.client('ecr', region_name=region, verify=False),
+    'route53': boto3.client('route53', region_name=region, verify=False)
+} for region in regions}
+
+sts_client = boto3.client('sts')
+account_number = sts_client.get_caller_identity()['Account']
+
+def paginate_boto3_results(client, method, key):
+    results = []
+    try:
+        paginator = client.get_paginator(method)
+        for page in paginator.paginate():
+            results.extend(page.get(key, []))
+    except Exception as e:
+        print(f"Error paginating results for {method}: {e}")
+    return results
+
+def get_s3_region(bucket_name, s3_client):
+    try:
+        response = s3_client.get_bucket_location(Bucket=bucket_name)
+        return response.get('LocationConstraint', 'us-east-1')  # Default to 'us-east-1' if not specified
+    except ClientError as e:
+        print(f"Error fetching region for S3 bucket {bucket_name}: {e}")
+        return 'unknown'
+
+def get_s3_tags(bucket_name, s3_client):
+    try:
+        response = s3_client.get_bucket_tagging(Bucket=bucket_name)
+        return {tag['Key']: tag['Value'] for tag in response.get('TagSet', [])}
+    except ClientError as e:
+        if e.response['Error']['Code'] == 'NoSuchTagSet':
+            return {}
+        else:
+            print(f"Error fetching tags for S3 bucket {bucket_name}: {e}")
+            return {}
+
+def get_resource_tags(client, resource_arn, resource_type):
+    try:
+        if resource_type == 'ec2':
+            response = client.describe_tags(Filters=[{'Name': 'resource-id', 'Values': [resource_arn]}])
+            return {tag['Key']: tag['Value'] for tag in response.get('Tags', [])}
+        elif resource_type == 'lambda':
+            response = client.list_tags(Resource=resource_arn)
+            return response.get('Tags', {})
+        elif resource_type in ['rds', 'elbv2', 'ecs', 'dynamodb', 'sns', 'sqs', 'redshift', 'dms', 'secretsmanager', 'elasticache', 'es', 'elasticbeanstalk', 'ecr', 'route53']:
+            response = client.list_tags_for_resource(ResourceArn=resource_arn)
+            return {tag['Key']: tag['Value'] for tag in response.get('TagList', [])}
+        else:
+            return {}
+    except ClientError as e:
+        print(f"Error fetching tags for resource {resource_arn}: {e}")
+        return {}
+
+def collect_resources_for_region(region):
+    ec2_client = clients[region]['ec2']
+    rds_client = clients[region]['rds']
+    lambda_client = clients[region]['lambda']
+    elb_client = clients[region]['elb']
+    elbv2_client = clients[region]['elbv2']
+    ecs_client = clients[region]['ecs']
+    dynamodb_client = clients[region]['dynamodb']
+    sns_client = clients[region]['sns']
+    sqs_client = clients[region]['sqs']
+    redshift_client = clients[region]['redshift']
+    dms_client = clients[region]['dms']
+    secretsmanager_client = clients[region]['secretsmanager']
+    elasticache_client = clients[region]['elasticache']
+    es_client = clients[region]['es']
+    elasticbeanstalk_client = clients[region]['elasticbeanstalk']
+    s3_client = clients[region]['s3']
+    ecr_client = clients[region]['ecr']
+    route53_client = clients[region]['route53']
+
+    resources = []
+
+    # Fetch EC2 instances
+    ec2_instances = paginate_boto3_results(ec2_client, 'describe_instances', 'Reservations')
+    for reservation in ec2_instances:
+        for instance in reservation['Instances']:
+            tags = get_resource_tags(ec2_client, instance['InstanceId'], 'ec2')
+            resources.append({
+                'ResourceType': 'EC2 Instance',
+                'ResourceArn': f"arn:aws:ec2:{region}:{account_number}:instance/{instance['InstanceId']}",
+                'ResourceName': tags.get('Name', 'N/A'),
+                'Region': region,
+                'Tags': tags
+            })
+
+    # Fetch RDS DB instances
+    rds_instances = paginate_boto3_results(rds_client, 'describe_db_instances', 'DBInstances')
+    for instance in rds_instances:
+        tags = get_resource_tags(rds_client, instance['DBInstanceArn'], 'rds')
+        resources.append({
+            'ResourceType': 'RDS DB Instance',
+            'ResourceArn': instance['DBInstanceArn'],
+            'ResourceName': instance['DBInstanceIdentifier'],
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch RDS DB clusters
+    rds_clusters = paginate_boto3_results(rds_client, 'describe_db_clusters', 'DBClusters')
+    for cluster in rds_clusters:
+        tags = get_resource_tags(rds_client, cluster['DBClusterArn'], 'rds')
+        resources.append({
+            'ResourceType': 'RDS DB Cluster',
+            'ResourceArn': cluster['DBClusterArn'],
+            'ResourceName': cluster['DBClusterIdentifier'],
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch Lambda functions
+    lambda_functions = paginate_boto3_results(lambda_client, 'list_functions', 'Functions')
+    for function in lambda_functions:
+        tags = get_resource_tags(lambda_client, function['FunctionArn'], 'lambda')
+        resources.append({
+            'ResourceType': 'Lambda Function',
+            'ResourceArn': function['FunctionArn'],
+            'ResourceName': function['FunctionName'],
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch Classic Load Balancers
+    elbs = paginate_boto3_results(elb_client, 'describe_load_balancers', 'LoadBalancerDescriptions')
+    for elb in elbs:
+        tags = get_resource_tags(elb_client, elb['LoadBalancerName'], 'elb')
+        resources.append({
+            'ResourceType': 'Classic Load Balancer',
+            'ResourceArn': f"arn:aws:elasticloadbalancing:{region}:{account_number}:loadbalancer/{elb['LoadBalancerName']}",
+            'ResourceName': elb['LoadBalancerName'],
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch Application Load Balancers
+    albs = paginate_boto3_results(elbv2_client, 'describe_load_balancers', 'LoadBalancers')
+    for alb in albs:
+        tags = get_resource_tags(elbv2_client, alb['LoadBalancerArn'], 'elbv2')
+        resources.append({
+            'ResourceType': 'Application Load Balancer',
+            'ResourceArn': alb['LoadBalancerArn'],
+            'ResourceName': alb['LoadBalancerName'],
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch ECS clusters
+    ecs_clusters = paginate_boto3_results(ecs_client, 'list_clusters', 'clusterArns')
+    for cluster_arn in ecs_clusters:
+        tag_response = ecs_client.list_tags_for_resource(resourceArn=cluster_arn)
+        cluster_tags = tag_response.get('tags', [])
+        tags = {tag['key']: tag['value'] for tag in cluster_tags}
+        resources.append({
+            'ResourceType': 'ECS Cluster',
+            'ResourceArn': cluster_arn,
+            'ResourceName': cluster_arn.split('/')[-1],
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch DynamoDB tables
+    dynamodb_tables = paginate_boto3_results(dynamodb_client, 'list_tables', 'TableNames')
+    for table_name in dynamodb_tables:
+        table_arn = f"arn:aws:dynamodb:{region}:{account_number}:table/{table_name}"
+        tags = get_resource_tags(dynamodb_client, table_arn, 'dynamodb')
+        resources.append({
+            'ResourceType': 'DynamoDB Table',
+            'ResourceArn': table_arn,
+            'ResourceName': table_name,
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch SNS topics
+    sns_topics = paginate_boto3_results(sns_client, 'list_topics', 'Topics')
+    for topic in sns_topics:
+        topic_arn = topic['TopicArn']
+        tags = get_resource_tags(sns_client, topic_arn, 'sns')
+        resources.append({
+            'ResourceType': 'SNS Topic',
+            'ResourceArn': topic_arn,
+            'ResourceName': topic_arn.split(':')[-1],
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch SQS queues
+    sqs_queues = paginate_boto3_results(sqs_client, 'list_queues', 'QueueUrls')
+    for queue_url in sqs_queues:
+        queue_arn = f"arn:aws:sqs:{region}:{account_number}:{queue_url.split('/')[-1]}"
+        tags = get_resource_tags(sqs_client, queue_arn, 'sqs')
+        resources.append({
+            'ResourceType': 'SQS Queue',
+            'ResourceArn': queue_url,
+            'ResourceName': queue_url.split('/')[-1],
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch Redshift clusters
+    redshift_clusters = paginate_boto3_results(redshift_client, 'describe_clusters', 'Clusters')
+    for cluster in redshift_clusters:
+        tags = get_resource_tags(redshift_client, cluster['ClusterNamespaceArn'], 'redshift')
+        resources.append({
+            'ResourceType': 'Redshift Cluster',
+            'ResourceArn': cluster['ClusterNamespaceArn'],
+            'ResourceName': cluster['ClusterIdentifier'],
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch DMS replication instances
+    dms_instances = paginate_boto3_results(dms_client, 'describe_replication_instances', 'ReplicationInstances')
+    for instance in dms_instances:
+        tags = get_resource_tags(dms_client, instance['ReplicationInstanceArn'], 'dms')
+        resources.append({
+            'ResourceType': 'DMS Replication Instance',
+            'ResourceArn': instance['ReplicationInstanceArn'],
+            'ResourceName': instance['ReplicationInstanceIdentifier'],
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch Secrets Manager secrets
+    secrets = paginate_boto3_results(secretsmanager_client, 'list_secrets', 'SecretList')
+    for secret in secrets:
+        tags = get_resource_tags(secretsmanager_client, secret['ARN'], 'secretsmanager')
+        resources.append({
+            'ResourceType': 'Secrets Manager Secret',
+            'ResourceArn': secret['ARN'],
+            'ResourceName': secret['Name'],
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch ElastiCache clusters
+    elasticache_clusters = paginate_boto3_results(elasticache_client, 'describe_cache_clusters', 'CacheClusters')
+    for cluster in elasticache_clusters:
+        tags = get_resource_tags(elasticache_client, cluster['CacheClusterId'], 'elasticache')
+        resources.append({
+            'ResourceType': 'ElastiCache Cluster',
+            'ResourceArn': f"arn:aws:elasticache:{region}:{account_number}:cluster/{cluster['CacheClusterId']}",
+            'ResourceName': cluster['CacheClusterId'],
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch OpenSearch domains
+    es_domains = paginate_boto3_results(es_client, 'list_domain_names', 'DomainNames')
+    for domain in es_domains:
+        domain_name = domain['DomainName']
+        tags = get_resource_tags(es_client, domain_name, 'opensearch')
+        resources.append({
+            'ResourceType': 'OpenSearch Domain',
+            'ResourceArn': f"arn:aws:es:{region}:{account_number}:domain/{domain_name}",
+            'ResourceName': domain_name,
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch Elastic Beanstalk environments
+    eb_environments = paginate_boto3_results(elasticbeanstalk_client, 'describe_environments', 'Environments')
+    for environment in eb_environments:
+        tags = get_resource_tags(elasticbeanstalk_client, environment['EnvironmentName'], 'elasticbeanstalk')
+        resources.append({
+            'ResourceType': 'Elastic Beanstalk Environment',
+            'ResourceArn': f"arn:aws:elasticbeanstalk:{region}:{account_number}:environment/{environment['ApplicationName']}/{environment['EnvironmentName']}",
+            'ResourceName': environment['EnvironmentName'],
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch S3 buckets
+    try:
+        s3_buckets = s3_client.list_buckets().get('Buckets', [])
+        processed_buckets = set()  # To avoid duplicates
+        for bucket in s3_buckets:
+            bucket_name = bucket['Name']
+            if bucket_name not in processed_buckets:
+                processed_buckets.add(bucket_name)
+                bucket_region = get_s3_region(bucket_name, s3_client)
+                tags = get_s3_tags(bucket_name, s3_client)
+                resources.append({
+                    'ResourceType': 'S3 Bucket',
+                    'ResourceArn': f"arn:aws:s3:::{bucket_name}",
+                    'ResourceName': bucket_name,
+                    'Region': bucket_region,
+                    'Tags': tags
+                })
+    except ClientError as e:
+        print(f"Error fetching S3 buckets: {e}")
+
+    # Fetch ECR repositories
+    ecr_repositories = paginate_boto3_results(ecr_client, 'describe_repositories', 'repositories')
+    for repo in ecr_repositories:
+        repo_arn = repo['repositoryArn']
+        tags = get_resource_tags(ecr_client, repo_arn, 'ecr')
+        resources.append({
+            'ResourceType': 'ECR Repository',
+            'ResourceArn': repo_arn,
+            'ResourceName': repo['repositoryName'],
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch Route 53 hosted zones
+    route53_zones = paginate_boto3_results(route53_client, 'list_hosted_zones', 'HostedZones')
+    processed_zones = set()  # To avoid duplicates
+    for zone in route53_zones:
+        zone_id = zone['Id'].split('/')[-1]
+        if zone_id not in processed_zones:
+            processed_zones.add(zone_id)
+            tags = get_resource_tags(route53_client, zone_id, 'route53')
+            resources.append({
+                'ResourceType': 'Route 53 Hosted Zone',
+                'ResourceArn': f"arn:aws:route53:::hostedzone/{zone_id}",
+                'ResourceName': zone['Name'],
+                'Region': region,
+                'Tags': tags
+            })
+
+    return resources
+
+# Collect all resources
+all_resources = []
+for region in regions:
+    all_resources.extend(collect_resources_for_region(region))
+
+# Define your desired tag keys
+fiserv_tag_keys = ['Environment', 'Project']  # Update with your actual tag keys
+
+# Write resources to CSV
+csv_headers = ['Resource Type', 'Resource ARN', 'Region', 'Resource Name', 'Account Number'] + fiserv_tag_keys
+
+with open('all_resources.csv', 'w', newline='') as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerow(csv_headers)
+
+    for resource in all_resources:
+        resource_type = resource['ResourceType']
+        resource_arn = resource['ResourceArn']
+        resource_name = resource['ResourceName']
+        region = resource['Region']
+        tags = resource['Tags']
+        fiserv_tags = [tags.get(tag, '') for tag in fiserv_tag_keys]
+
+        row_data = [resource_type, resource_arn, region, resource_name, account_number] + fiserv_tags
+        writer.writerow(row_data)
