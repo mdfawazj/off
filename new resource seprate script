@@ -550,4 +550,136 @@ for cluster_arn in ecs_clusters:
 
 # Fetch DynamoDB tables
 dynamodb_tables = paginate_boto3_results(dynamodb_client, 'list_tables', 'TableNames')
-for table_name
+for table_name in dynamodb_tables:
+    table_arn = f"arn:aws:dynamodb:{region}:{account_number}:table/{table_name}"
+    tags = get_dynamodb_tags(table_arn)
+    resources.append({
+        'ResourceType': 'DynamoDB Table',
+        'ResourceArn': table_arn,
+        'ResourceName': table_name,
+        'Tags': tags
+    })
+
+# Fetch SNS topics
+sns_topics = paginate_boto3_results(sns_client, 'list_topics', 'Topics')
+for topic in sns_topics:
+    topic_arn = topic['TopicArn']
+    tags = get_sns_tags(topic_arn)
+    resources.append({
+        'ResourceType': 'SNS Topic',
+        'ResourceArn': topic_arn,
+        'ResourceName': topic_arn.split(':')[-1],
+        'Tags': tags
+    })
+
+# Fetch SQS queues
+sqs_queues = paginate_boto3_results(sqs_client, 'list_queues', 'QueueUrls')
+for queue_url in sqs_queues:
+    tags = get_sqs_tags(queue_url)
+    resources.append({
+        'ResourceType': 'SQS Queue',
+        'ResourceArn': queue_url,
+        'ResourceName': queue_url.split('/')[-1],
+        'Tags': tags
+    })
+
+# Fetch Redshift clusters
+redshift_clusters = paginate_boto3_results(redshift_client, 'describe_clusters', 'Clusters')
+for cluster in redshift_clusters:
+    cluster_arn = cluster['ClusterNamespaceArn']
+    tags = get_redshift_tags(cluster_arn)
+    resources.append({
+        'ResourceType': 'Redshift Cluster',
+        'ResourceArn': cluster_arn,
+        'ResourceName': cluster['ClusterIdentifier'],
+        'Tags': tags
+    })
+
+# Fetch DMS replication tasks
+dms_tasks = paginate_boto3_results(dms_client, 'describe_replication_tasks', 'ReplicationTasks')
+for task in dms_tasks:
+    task_arn = task['ReplicationTaskArn']
+    tags = get_dms_tags(task_arn)
+    resources.append({
+        'ResourceType': 'DMS Replication Task',
+        'ResourceArn': task_arn,
+        'ResourceName': task['ReplicationTaskIdentifier'],
+        'Tags': tags
+    })
+
+# Fetch SecretsManager secrets
+secrets = paginate_boto3_results(secretsmanager_client, 'list_secrets', 'SecretList')
+for secret in secrets:
+    secret_arn = secret['ARN']
+    tags = get_secretsmanager_tags(secret_arn)
+    resources.append({
+        'ResourceType': 'SecretsManager Secret',
+        'ResourceArn': secret_arn,
+        'ResourceName': secret['Name'],
+        'Tags': tags
+    })
+
+# Fetch ElastiCache clusters
+elasticache_clusters = paginate_boto3_results(elasticache_client, 'describe_cache_clusters', 'CacheClusters')
+for cluster in elasticache_clusters:
+    cluster_arn = f"arn:aws:elasticache:{region}:{account_number}:cluster:{cluster['CacheClusterId']}"
+    tags = get_elasticache_tags(cluster_arn)
+    resources.append({
+        'ResourceType': 'ElastiCache Cluster',
+        'ResourceArn': cluster_arn,
+        'ResourceName': cluster['CacheClusterId'],
+        'Tags': tags
+    })
+
+# Fetch Elasticsearch domains
+es_domains = paginate_boto3_results(es_client, 'list_domain_names', 'DomainNames')
+for domain in es_domains:
+    domain_name = domain['DomainName']
+    domain_arn = f"arn:aws:es:{region}:{account_number}:domain/{domain_name}"
+    tags = get_es_tags(domain_arn)
+    resources.append({
+        'ResourceType': 'Elasticsearch Domain',
+        'ResourceArn': domain_arn,
+        'ResourceName': domain_name,
+        'Tags': tags
+    })
+
+# Fetch Elastic Beanstalk applications
+ebs_apps = paginate_boto3_results(elasticbeanstalk_client, 'describe_applications', 'Applications')
+for app in ebs_apps:
+    app_name = app['ApplicationName']
+    tags = get_ebs_tags(app_name)
+    resources.append({
+        'ResourceType': 'Elastic Beanstalk Application',
+        'ResourceArn': f"arn:aws:elasticbeanstalk:{region}:{account_number}:application/{app_name}",
+        'ResourceName': app_name,
+        'Tags': tags
+    })
+
+# Fetch S3 buckets
+s3_buckets = paginate_boto3_results(s3_client, 'list_buckets', 'Buckets')
+for bucket in s3_buckets:
+    bucket_name = bucket['Name']
+    tags = get_s3_tags(bucket_name)
+    resources.append({
+        'ResourceType': 'S3 Bucket',
+        'ResourceArn': f"arn:aws:s3:::{bucket_name}",
+        'ResourceName': bucket_name,
+        'Tags': tags
+    })
+
+csv_headers = ['Resource Type', 'Resource ARN', 'Region', 'Resource Name', 'Account Number'] + fiserv_tag_keys
+
+with open('all_resources.csv', 'w', newline='') as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerow(csv_headers)
+
+    for resource in resources:
+        resource_type = resource['ResourceType']
+        resource_arn = resource['ResourceArn']
+        resource_name = resource['ResourceName']
+        tags = resource['Tags']
+        fiserv_tags = [tags.get(tag, '') for tag in fiserv_tag_keys]
+
+        row_data = [resource_type, resource_arn, region, resource_name, account_number] + fiserv_tags
+        writer.writerow(row_data)
