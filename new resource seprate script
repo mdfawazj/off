@@ -1785,3 +1785,14 @@ with open('all_resources.csv', 'w', newline='') as csvfile:
 
         row_data = [resource_type, resource_arn, region, resource_name, account_number] + fiserv_tags
         writer.writerow(row_data)
+
+
+
+
+
+Error fetching S3 buckets: <botocore.errorfactory.S3Exceptions object at 0x000001EE375AEE50> object has no attribute NoSuchTagSet. Valid exceptions are: BucketAlreadyExists, BucketAlreadyOwnedByYou, InvalidObjectState, NoSuchBucket, NoSuchKey, NoSuchUpload, ObjectAlreadyInActiveTierError, ObjectNotInActiveTierError
+
+
+
+
+
