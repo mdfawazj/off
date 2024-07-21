@@ -157,3 +157,22 @@ with open('all_resources.csv', 'w', newline='') as csvfile:
 
         row_data = [resource_type, resource_arn, region, resource_name, account_number] + fiserv_tags
         writer.writerow(row_data)
+
+
+
+
+
+
+
+
+ECS::Cluster
+DynamoDB::Table
+SNS::Topic
+SQS::Queue
+Redshift::Cluster
+DMS::ReplicationTask
+SecretsManager::Secret
+ElastiCache::CacheCluster
+Elasticsearch::Domain
+ElasticBeanstalk::Application
+S3::Bucket
