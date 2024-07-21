@@ -1,114 +1,342 @@
-Traceback (most recent call last):
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\urllib3\connectionpool.py", line 466, in _make_request
-    self._validate_conn(conn)
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\urllib3\connectionpool.py", line 1095, in _validate_conn
-    conn.connect()
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\urllib3\connection.py", line 652, in connect
-    sock_and_verified = _ssl_wrap_socket_and_match_hostname(
-                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\urllib3\connection.py", line 805, in _ssl_wrap_socket_and_match_hostname
-    ssl_sock = ssl_wrap_socket(
-               ^^^^^^^^^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\urllib3\util\ssl_.py", line 465, in ssl_wrap_socket
-    ssl_sock = _ssl_wrap_socket_impl(sock, context, tls_in_tls, server_hostname)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\urllib3\util\ssl_.py", line 509, in _ssl_wrap_socket_impl
-    return ssl_context.wrap_socket(sock, server_hostname=server_hostname)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Program Files\Python311\Lib\ssl.py", line 517, in wrap_socket
-    return self.sslsocket_class._create(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Program Files\Python311\Lib\ssl.py", line 1104, in _create
-    self.do_handshake()
-  File "C:\Program Files\Python311\Lib\ssl.py", line 1382, in do_handshake
-    self._sslobj.do_handshake()
-ssl.SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1006)
+import boto3
+import csv
+from botocore.exceptions import ClientError
 
-During handling of the above exception, another exception occurred:
+regions = ['us-east-1', 'us-west-1', 'eu-central-1']  # List of regions
+account_number = boto3.client('sts').get_caller_identity()['Account']
 
-Traceback (most recent call last):
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\httpsession.py", line 464, in send
-    urllib_response = conn.urlopen(
-                      ^^^^^^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\urllib3\connectionpool.py", line 843, in urlopen
-    retries = retries.increment(
-              ^^^^^^^^^^^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\urllib3\util\retry.py", line 449, in increment
-    raise reraise(type(error), error, _stacktrace)
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\urllib3\util\util.py", line 39, in reraise
-    raise value
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\urllib3\connectionpool.py", line 789, in urlopen
-    response = self._make_request(
-               ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\urllib3\connectionpool.py", line 490, in _make_request
-    raise new_e
-urllib3.exceptions.SSLError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1006)
+# Function to create clients for a given region
+def create_clients(region):
+    return {
+        'ec2': boto3.client('ec2', region_name=region, verify=False),
+        'rds': boto3.client('rds', region_name=region, verify=False),
+        'lambda': boto3.client('lambda', region_name=region, verify=False),
+        'elb': boto3.client('elb', region_name=region, verify=False),
+        'elbv2': boto3.client('elbv2', region_name=region, verify=False),
+        'ecs': boto3.client('ecs', region_name=region, verify=False),
+        'dynamodb': boto3.client('dynamodb', region_name=region, verify=False),
+        'sns': boto3.client('sns', region_name=region, verify=False),
+        'sqs': boto3.client('sqs', region_name=region, verify=False),
+        'redshift': boto3.client('redshift', region_name=region, verify=False),
+        'dms': boto3.client('dms', region_name=region, verify=False),
+        'secretsmanager': boto3.client('secretsmanager', region_name=region, verify=False),
+        'elasticache': boto3.client('elasticache', region_name=region, verify=False),
+        'es': boto3.client('es', region_name=region, verify=False),
+        'elasticbeanstalk': boto3.client('elasticbeanstalk', region_name=region, verify=False),
+        's3': boto3.client('s3', region_name=region, verify=False),
+        'ecr': boto3.client('ecr', region_name=region, verify=False),
+        'route53': boto3.client('route53', region_name=region, verify=False),
+    }
 
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "H:\pychram\pulled\newtest\newscriptmulti.py", line 80, in <module>
-    ec2_instances = paginate_boto3_results(clients['ec2'], 'describe_instances', 'Reservations')
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "H:\pychram\pulled\newtest\newscriptmulti.py", line 51, in paginate_boto3_results
+def paginate_boto3_results(client, method, key):
+    results = []
+    paginator = client.get_paginator(method)
     for page in paginator.paginate():
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\paginate.py", line 269, in __iter__
-    response = self._make_request(current_kwargs)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\paginate.py", line 357, in _make_request
-    return self._method(**current_kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\client.py", line 565, in _api_call
-    return self._make_api_call(operation_name, kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\client.py", line 1001, in _make_api_call
-    http, parsed_response = self._make_request(
-                            ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\client.py", line 1027, in _make_request
-    return self._endpoint.make_request(operation_model, request_dict)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\endpoint.py", line 119, in make_request
-    return self._send_request(request_dict, operation_model)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\endpoint.py", line 202, in _send_request
-    while self._needs_retry(
-          ^^^^^^^^^^^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\endpoint.py", line 354, in _needs_retry
-    responses = self._event_emitter.emit(
-                ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\hooks.py", line 412, in emit
-    return self._emitter.emit(aliased_event_name, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\hooks.py", line 256, in emit
-    return self._emit(event_name, kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\hooks.py", line 239, in _emit
-    response = handler(**kwargs)
-               ^^^^^^^^^^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\retryhandler.py", line 207, in __call__
-    if self._checker(**checker_kwargs):
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\retryhandler.py", line 284, in __call__
-    should_retry = self._should_retry(
-                   ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\retryhandler.py", line 320, in _should_retry
-    return self._checker(attempt_number, response, caught_exception)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\retryhandler.py", line 363, in __call__
-    checker_response = checker(
-                       ^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\retryhandler.py", line 247, in __call__
-    return self._check_caught_exception(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\retryhandler.py", line 416, in _check_caught_exception
-    raise caught_exception
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\endpoint.py", line 281, in _do_get_response
-    http_response = self._send(request)
-                    ^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\endpoint.py", line 377, in _send
-    return self.http_session.send(request)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\httpsession.py", line 491, in send
-    raise SSLError(endpoint_url=request.url, error=e)
-botocore.exceptions.SSLError: SSL validation failed for https://ec2.us-east-1.amazonaws.com/ [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1006)
+        results.extend(page.get(key, []))
+    return results
+
+def get_tags(client, resource_type, arn):
+    try:
+        if resource_type == 's3':
+            response = client.get_bucket_tagging(Bucket=arn)
+            return {tag['Key']: tag['Value'] for tag in response.get('TagSet', [])}
+        elif resource_type == 'ec2':
+            response = client.describe_tags(Filters=[{'Name': 'resource-id', 'Values': [arn]}])
+            return {tag['Key']: tag['Value'] for tag in response.get('Tags', [])}
+        elif resource_type == 'rds':
+            response = client.list_tags_for_resource(ResourceName=arn)
+            return {tag['Key']: tag['Value'] for tag in response.get('TagList', [])}
+        elif resource_type == 'lambda':
+            response = client.list_tags(Resource=arn)
+            return response.get('Tags', {})
+        elif resource_type == 'elb':
+            response = client.describe_tags(LoadBalancerNames=[arn])
+            tags = {}
+            if response['TagDescriptions']:
+                for tag in response['TagDescriptions'][0]['Tags']:
+                    tags[tag['Key']] = tag['Value']
+            return tags
+        elif resource_type == 'elbv2':
+            response = client.describe_tags(ResourceArns=[arn])
+            tags = {}
+            if response['TagDescriptions']:
+                for tag in response['TagDescriptions'][0]['Tags']:
+                    tags[tag['Key']] = tag['Value']
+            return tags
+        elif resource_type == 'dynamodb':
+            response = client.list_tags_of_resource(ResourceArn=arn)
+            return {tag['Key']: tag['Value'] for tag in response.get('Tags', [])}
+        elif resource_type == 'sns':
+            response = client.list_tags_for_resource(ResourceArn=arn)
+            return {tag['Key']: tag['Value'] for tag in response.get('Tags', [])}
+        elif resource_type == 'sqs':
+            response = client.list_queue_tags(QueueUrl=arn)
+            return response.get('Tags', {})
+        elif resource_type == 'redshift':
+            response = client.describe_tags(ResourceName=arn)
+            return {tag['Key']: tag['Value'] for tag in response.get('TaggedResources', [])}
+        elif resource_type == 'dms':
+            response = client.list_tags_for_resource(ResourceArn=arn)
+            return {tag['Key']: tag['Value'] for tag in response.get('TagList', [])}
+        elif resource_type == 'secretsmanager':
+            response = client.describe_secret(SecretId=arn)
+            return {tag['Key']: tag['Value'] for tag in response.get('Tags', [])}
+        elif resource_type == 'elasticache':
+            response = client.list_tags_for_resource(ResourceName=arn)
+            return {tag['Key']: tag['Value'] for tag in response.get('TagList', [])}
+        elif resource_type == 'es':
+            response = client.list_tags(ARN=arn)
+            return {tag['Key']: tag['Value'] for tag in response.get('TagList', [])}
+        elif resource_type == 'elasticbeanstalk':
+            response = client.list_tags_for_resource(ResourceArn=arn)
+            return {tag['Key']: tag['Value'] for tag in response.get('ResourceTags', [])}
+        elif resource_type == 'ecr':
+            response = client.list_tags_for_resource(resourceArn=arn)
+            return {tag['Key']: tag['Value'] for tag in response.get('tags', [])}
+        elif resource_type == 'route53':
+            response = client.list_tags_for_resource(ResourceType='hostedzone', ResourceId=arn)
+            return {tag['Key']: tag['Value'] for tag in response.get('Tags', [])}
+    except ClientError as e:
+        print(f"Error fetching tags for {resource_type} {arn}: {e}")
+        return {}
+
+# Specify the 'fiserv' tag keys
+fiserv_tag_keys = ['fiserv::apm', 'fiserv::app', 'fiserv::description', 'fiserv::owner', 'fiserv::group', 'fiserv::stage', 'fiserv::environment']
+
+resources = []
+processed_s3_buckets = set()
+
+for region in regions:
+    print(f"Processing region: {region}")
+    clients = create_clients(region)
+
+    # Fetch EC2 instances
+    ec2_instances = paginate_boto3_results(clients['ec2'], 'describe_instances', 'Reservations')
+    for reservation in ec2_instances:
+        for instance in reservation['Instances']:
+            tags = get_tags(clients['ec2'], 'ec2', instance['InstanceId'])
+            resources.append({
+                'ResourceType': 'EC2 Instance',
+                'ResourceArn': f"arn:aws:ec2:{region}:{account_number}:instance/{instance['InstanceId']}",
+                'ResourceName': tags.get('Name', 'N/A'),
+                'Region': region,
+                'Tags': tags
+            })
+
+    # Fetch RDS DB instances
+    rds_instances = paginate_boto3_results(clients['rds'], 'describe_db_instances', 'DBInstances')
+    for instance in rds_instances:
+        tags = get_tags(clients['rds'], 'rds', instance['DBInstanceArn'])
+        resources.append({
+            'ResourceType': 'RDS DB Instance',
+            'ResourceArn': instance['DBInstanceArn'],
+            'ResourceName': instance['DBInstanceIdentifier'],
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch RDS DB clusters
+    rds_clusters = paginate_boto3_results(clients['rds'], 'describe_db_clusters', 'DBClusters')
+    for cluster in rds_clusters:
+        tags = get_tags(clients['rds'], 'rds', cluster['DBClusterArn'])
+        resources.append({
+            'ResourceType': 'RDS DB Cluster',
+            'ResourceArn': cluster['DBClusterArn'],
+            'ResourceName': cluster['DBClusterIdentifier'],
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch Lambda functions
+    lambda_functions = paginate_boto3_results(clients['lambda'], 'list_functions', 'Functions')
+    for function in lambda_functions:
+        tags = get_tags(clients['lambda'], 'lambda', function['FunctionArn'])
+        resources.append({
+            'ResourceType': 'Lambda Function',
+            'ResourceArn': function['FunctionArn'],
+            'ResourceName': function['FunctionName'],
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch Classic Load Balancers
+    elbs = paginate_boto3_results(clients['elb'], 'describe_load_balancers', 'LoadBalancerDescriptions')
+    for elb in elbs:
+        tags = get_tags(clients['elb'], 'elb', elb['LoadBalancerName'])
+        resources.append({
+            'ResourceType': 'Classic Load Balancer',
+            'ResourceArn': f"arn:aws:elasticloadbalancing:{region}:{account_number}:loadbalancer/{elb['LoadBalancerName']}",
+            'ResourceName': elb['LoadBalancerName'],
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch Application Load Balancers
+    albs = paginate_boto3_results(clients['elbv2'], 'describe_load_balancers', 'LoadBalancers')
+    for alb in albs:
+        tags = get_tags(clients['elbv2'], 'elbv2', alb['LoadBalancerArn'])
+        resources.append({
+            'ResourceType': 'Application Load Balancer',
+            'ResourceArn': alb['LoadBalancerArn'],
+            'ResourceName': alb['LoadBalancerName'],
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch ECS clusters
+    ecs_clusters = paginate_boto3_results(clients['ecs'], 'list_clusters', 'clusterArns')
+    for cluster_arn in ecs_clusters:
+        cluster_name = cluster_arn.split('/')[-1]
+        tags = get_tags(clients['ecs'], 'ecs', cluster_arn)
+        resources.append({
+            'ResourceType': 'ECS Cluster',
+            'ResourceArn': cluster_arn,
+            'ResourceName': cluster_name,
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch DynamoDB tables
+    dynamodb_tables = paginate_boto3_results(clients['dynamodb'], 'list_tables', 'TableNames')
+    for table_name in dynamodb_tables:
+        tags = get_tags(clients['dynamodb'], 'dynamodb', f"arn:aws:dynamodb:{region}:{account_number}:table/{table_name}")
+        resources.append({
+            'ResourceType': 'DynamoDB Table',
+            'ResourceArn': f"arn:aws:dynamodb:{region}:{account_number}:table/{table_name}",
+            'ResourceName': table_name,
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch SNS topics
+    sns_topics = paginate_boto3_results(clients['sns'], 'list_topics', 'Topics')
+    for topic in sns_topics:
+        tags = get_tags(clients['sns'], 'sns', topic['TopicArn'])
+        resources.append({
+            'ResourceType': 'SNS Topic',
+            'ResourceArn': topic['TopicArn'],
+            'ResourceName': topic['TopicArn'].split(':')[-1],
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch SQS queues
+    sqs_queues = paginate_boto3_results(clients['sqs'], 'list_queues', 'QueueUrls')
+    for queue_url in sqs_queues:
+        tags = get_tags(clients['sqs'], 'sqs', queue_url)
+        resources.append({
+            'ResourceType': 'SQS Queue',
+            'ResourceArn': f"arn:aws:sqs:{region}:{account_number}:queue/{queue_url.split('/')[-1]}",
+            'ResourceName': queue_url.split('/')[-1],
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch Redshift clusters
+    redshift_clusters = paginate_boto3_results(clients['redshift'], 'describe_clusters', 'Clusters')
+    for cluster in redshift_clusters:
+        tags = get_tags(clients['redshift'], 'redshift', cluster['ClusterArn'])
+        resources.append({
+            'ResourceType': 'Redshift Cluster',
+            'ResourceArn': cluster['ClusterArn'],
+            'ResourceName': cluster['ClusterIdentifier'],
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch DMS replication instances
+    dms_reps = paginate_boto3_results(clients['dms'], 'describe_replication_instances', 'ReplicationInstances')
+    for rep in dms_reps:
+        tags = get_tags(clients['dms'], 'dms', rep['ReplicationInstanceArn'])
+        resources.append({
+            'ResourceType': 'DMS Replication Instance',
+            'ResourceArn': rep['ReplicationInstanceArn'],
+            'ResourceName': rep['ReplicationInstanceIdentifier'],
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch Secrets Manager secrets
+    secrets = paginate_boto3_results(clients['secretsmanager'], 'list_secrets', 'SecretList')
+    for secret in secrets:
+        tags = get_tags(clients['secretsmanager'], 'secretsmanager', secret['ARN'])
+        resources.append({
+            'ResourceType': 'Secrets Manager Secret',
+            'ResourceArn': secret['ARN'],
+            'ResourceName': secret['Name'],
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch ElastiCache clusters
+    elasticache_clusters = paginate_boto3_results(clients['elasticache'], 'list_tags_for_resource', 'TagList')
+    for cluster in elasticache_clusters:
+        tags = get_tags(clients['elasticache'], 'elasticache', cluster['ARN'])
+        resources.append({
+            'ResourceType': 'ElastiCache Cluster',
+            'ResourceArn': cluster['ARN'],
+            'ResourceName': cluster['Name'],
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch Elasticsearch domains
+    es_domains = paginate_boto3_results(clients['es'], 'list_domain_names', 'DomainNames')
+    for domain in es_domains:
+        domain_name = domain['DomainName']
+        domain_arn = f"arn:aws:es:{region}:{account_number}:domain/{domain_name}"
+        tags = get_tags(clients['es'], 'es', domain_arn)
+        resources.append({
+            'ResourceType': 'Elasticsearch Domain',
+            'ResourceArn': domain_arn,
+            'ResourceName': domain_name,
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch Elastic Beanstalk environments
+    eb_environments = paginate_boto3_results(clients['elasticbeanstalk'], 'describe_environments', 'Environments')
+    for environment in eb_environments:
+        tags = get_tags(clients['elasticbeanstalk'], 'elasticbeanstalk', environment['EnvironmentArn'])
+        resources.append({
+            'ResourceType': 'Elastic Beanstalk Environment',
+            'ResourceArn': environment['EnvironmentArn'],
+            'ResourceName': environment['EnvironmentName'],
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch ECR repositories
+    ecr_repositories = paginate_boto3_results(clients['ecr'], 'describe_repositories', 'repositories')
+    for repo in ecr_repositories:
+        tags = get_tags(clients['ecr'], 'ecr', repo['repositoryArn'])
+        resources.append({
+            'ResourceType': 'ECR Repository',
+            'ResourceArn': repo['repositoryArn'],
+            'ResourceName': repo['repositoryName'],
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch Route 53 hosted zones
+    route53_zones = paginate_boto3_results(clients['route53'], 'list_hosted_zones', 'HostedZones')
+    for zone in route53_zones:
+        zone_id = zone['Id']
+        tags = get_tags(clients['route53'], 'route53', zone_id)
+        resources.append({
+            'ResourceType': 'Route 53 Hosted Zone',
+            'ResourceArn': f"arn:aws:route53:{region}:{account_number}:hostedzone/{zone_id.split('/')[-1]}",
+            'ResourceName': zone['Name'],
+            'Region': region,
+            'Tags': tags
+        })
+
+# Write the collected data to a CSV file
+with open('aws_resources.csv', 'w', newline='') as csvfile:
+    fieldnames = ['ResourceType', 'ResourceArn', 'ResourceName', 'Region', 'Tags']
+    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+    writer.writeheader()
+    for resource in resources:
+        resource['Tags'] = '; '.join(f"{k}={v}" for k, v in resource['Tags'].items())
+        writer.writerow(resource)
