@@ -21,6 +21,10 @@ def paginate_boto3_results(client, method, key):
         results.extend(page.get(key, []))
     return results
 
+def get_resource_tags(client, resource_arn, tag_key='Tags'):
+    response = client.list_tags_for_resource(ResourceArn=resource_arn)
+    return {tag['Key']: tag['Value'] for tag in response.get(tag_key, [])}
+
 # Specify the 'fiserv' tag keys
 fiserv_tag_keys = ['fiserv::apm', 'fiserv::app', 'fiserv::description', 'fiserv::owner', 'fiserv::group', 'fiserv::stage', 'fiserv::environment']
 
@@ -28,31 +32,83 @@ resources = []
 
 # Fetch EC2 instances
 ec2_instances = paginate_boto3_results(ec2_client, 'describe_instances', 'Reservations')
-resources.extend(ec2_instances)
+for reservation in ec2_instances:
+    for instance in reservation['Instances']:
+        tags = {tag['Key']: tag['Value'] for tag in instance.get('Tags', [])}
+        resources.append({
+            'ResourceType': 'EC2 Instance',
+            'ResourceArn': f"arn:aws:ec2:{region}:{account_number}:instance/{instance['InstanceId']}",
+            'ResourceName': tags.get('Name', 'N/A'),
+            'Tags': tags
+        })
 
-# Fetch RDS DB instances and clusters
+# Fetch RDS DB instances
 rds_instances = paginate_boto3_results(rds_client, 'describe_db_instances', 'DBInstances')
-resources.extend(rds_instances)
+for instance in rds_instances:
+    tags = get_resource_tags(rds_client, instance['DBInstanceArn'])
+    resources.append({
+        'ResourceType': 'RDS DB Instance',
+        'ResourceArn': instance['DBInstanceArn'],
+        'ResourceName': instance['DBInstanceIdentifier'],
+        'Tags': tags
+    })
 
+# Fetch RDS DB clusters
 rds_clusters = paginate_boto3_results(rds_client, 'describe_db_clusters', 'DBClusters')
-resources.extend(rds_clusters)
+for cluster in rds_clusters:
+    tags = get_resource_tags(rds_client, cluster['DBClusterArn'])
+    resources.append({
+        'ResourceType': 'RDS DB Cluster',
+        'ResourceArn': cluster['DBClusterArn'],
+        'ResourceName': cluster['DBClusterIdentifier'],
+        'Tags': tags
+    })
 
 # Fetch Lambda functions
 lambda_functions = paginate_boto3_results(lambda_client, 'list_functions', 'Functions')
-resources.extend(lambda_functions)
+for function in lambda_functions:
+    tags = get_resource_tags(lambda_client, function['FunctionArn'], tag_key='Tags')
+    resources.append({
+        'ResourceType': 'Lambda Function',
+        'ResourceArn': function['FunctionArn'],
+        'ResourceName': function['FunctionName'],
+        'Tags': tags
+    })
 
 # Fetch Classic Load Balancers
 elbs = paginate_boto3_results(elb_client, 'describe_load_balancers', 'LoadBalancerDescriptions')
-resources.extend(elbs)
+for elb in elbs:
+    tags = get_resource_tags(elb_client, f"arn:aws:elasticloadbalancing:{region}:{account_number}:loadbalancer/{elb['LoadBalancerName']}", tag_key='Tags')
+    resources.append({
+        'ResourceType': 'Classic Load Balancer',
+        'ResourceArn': f"arn:aws:elasticloadbalancing:{region}:{account_number}:loadbalancer/{elb['LoadBalancerName']}",
+        'ResourceName': elb['LoadBalancerName'],
+        'Tags': tags
+    })
 
 # Fetch Application Load Balancers
 albs = paginate_boto3_results(elbv2_client, 'describe_load_balancers', 'LoadBalancers')
-resources.extend(albs)
+for alb in albs:
+    tags = get_resource_tags(elbv2_client, alb['LoadBalancerArn'], tag_key='Tags')
+    resources.append({
+        'ResourceType': 'Application Load Balancer',
+        'ResourceArn': alb['LoadBalancerArn'],
+        'ResourceName': alb['LoadBalancerName'],
+        'Tags': tags
+    })
 
 # Fetch ECS clusters
 ecs_clusters = paginate_boto3_results(ecs_client, 'list_clusters', 'clusterArns')
 for cluster_arn in ecs_clusters:
-    resources.append({'clusterArn': cluster_arn})
+    tag_response = ecs_client.list_tags_for_resource(resourceArn=cluster_arn)
+    cluster_tags = tag_response.get('tags', [])
+    fiserv_tags = {tag['key']: tag['value'] for tag in cluster_tags}
+    resources.append({
+        'ResourceType': 'ECS Cluster',
+        'ResourceArn': cluster_arn,
+        'ResourceName': cluster_arn.split('/')[-1],
+        'Tags': fiserv_tags
+    })
 
 csv_headers = ['Resource Type', 'Resource ARN', 'Region', 'Resource Name', 'Account Number'] + fiserv_tag_keys
 
@@ -61,53 +117,11 @@ with open('all_resources.csv', 'w', newline='') as csvfile:
     writer.writerow(csv_headers)
 
     for resource in resources:
-        resource_type = ''
-        resource_arn = ''
-        resource_name = ''
-
-        if 'Instances' in resource and resource['Instances']:
-            resource_type = 'EC2 Instance'
-            resource_arn = f"arn:aws:ec2:{region}:{account_number}:instance/{resource['Instances'][0]['InstanceId']}"
-            resource_name = resource['Instances'][0].get('Tags', [{'Key': 'Name', 'Value': 'N/A'}])[0]['Value']
-            fiserv_tags = [resource['Instances'][0].get(tag, '') for tag in fiserv_tag_keys]
-
-        elif 'DBInstanceArn' in resource:
-            resource_type = 'RDS DB Instance'
-            resource_arn = resource['DBInstanceArn']
-            resource_name = resource['DBInstanceIdentifier']
-            fiserv_tags = [resource.get(tag, '') for tag in fiserv_tag_keys]
-
-        elif 'DBClusterArn' in resource:
-            resource_type = 'RDS DB Cluster'
-            resource_arn = resource['DBClusterArn']
-            resource_name = resource['DBClusterIdentifier']
-            fiserv_tags = [resource.get(tag, '') for tag in fiserv_tag_keys]
-
-        elif 'FunctionArn' in resource:
-            resource_type = 'Lambda Function'
-            resource_arn = resource['FunctionArn']
-            resource_name = resource['FunctionName']
-            fiserv_tags = [''] * len(fiserv_tag_keys)
-
-        elif 'LoadBalancerName' in resource:
-            resource_type = 'Classic Load Balancer'
-            resource_arn = f"arn:aws:elasticloadbalancing:{region}:{account_number}:loadbalancer/{resource['LoadBalancerName']}"
-            resource_name = resource['LoadBalancerName']
-            fiserv_tags = [''] * len(fiserv_tag_keys)
-
-        elif 'LoadBalancerArn' in resource:
-            resource_type = 'Application Load Balancer'
-            resource_arn = resource['LoadBalancerArn']
-            resource_name = resource['LoadBalancerName']
-            fiserv_tags = [''] * len(fiserv_tag_keys)
-
-        elif 'clusterArn' in resource:
-            resource_type = 'ECS Cluster'
-            resource_arn = resource['clusterArn']
-            resource_name = resource_arn.split('/')[-1]
-            tag_response = ecs_client.list_tags_for_resource(resourceArn=resource_arn)
-            cluster_tags = tag_response.get('tags', [])
-            fiserv_tags = [tag['value'] if tag['key'] in fiserv_tag_keys else '' for tag in cluster_tags]
+        resource_type = resource['ResourceType']
+        resource_arn = resource['ResourceArn']
+        resource_name = resource['ResourceName']
+        tags = resource['Tags']
+        fiserv_tags = [tags.get(tag, '') for tag in fiserv_tag_keys]
 
         row_data = [resource_type, resource_arn, region, resource_name, account_number] + fiserv_tags
         writer.writerow(row_data)
