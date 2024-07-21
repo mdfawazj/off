@@ -1,26 +1,37 @@
 import boto3
 import csv
+from botocore.config import Config
 
-# Initialize boto3 clients for different AWS services
+# Create a custom configuration to disable SSL certificate verification
+config = Config(
+    retries={
+        'max_attempts': 10,
+        'mode': 'standard'
+    },
+    signature_version='v4',
+    ssl=False  # Disable SSL certificate verification
+)
+
+# Initialize boto3 clients for different AWS services with the custom config
 clients = {
-    'lambda': boto3.client('lambda'),
-    'ec2': boto3.client('ec2'),
-    'rds': boto3.client('rds'),
-    'elb': boto3.client('elb'),
-    'elbv2': boto3.client('elbv2'),
-    'ecs': boto3.client('ecs'),
-    'dynamodb': boto3.client('dynamodb'),
-    'sns': boto3.client('sns'),
-    'sqs': boto3.client('sqs'),
-    'redshift': boto3.client('redshift'),
-    'dms': boto3.client('dms'),
-    'secretsmanager': boto3.client('secretsmanager'),
-    'elasticache': boto3.client('elasticache'),
-    'es': boto3.client('es'),
-    'elasticbeanstalk': boto3.client('elasticbeanstalk'),
-    's3': boto3.client('s3'),
-    'ecr': boto3.client('ecr'),
-    'route53': boto3.client('route53')
+    'lambda': boto3.client('lambda', config=config),
+    'ec2': boto3.client('ec2', config=config),
+    'rds': boto3.client('rds', config=config),
+    'elb': boto3.client('elb', config=config),
+    'elbv2': boto3.client('elbv2', config=config),
+    'ecs': boto3.client('ecs', config=config),
+    'dynamodb': boto3.client('dynamodb', config=config),
+    'sns': boto3.client('sns', config=config),
+    'sqs': boto3.client('sqs', config=config),
+    'redshift': boto3.client('redshift', config=config),
+    'dms': boto3.client('dms', config=config),
+    'secretsmanager': boto3.client('secretsmanager', config=config),
+    'elasticache': boto3.client('elasticache', config=config),
+    'es': boto3.client('es', config=config),
+    'elasticbeanstalk': boto3.client('elasticbeanstalk', config=config),
+    's3': boto3.client('s3', config=config),
+    'ecr': boto3.client('ecr', config=config),
+    'route53': boto3.client('route53', config=config)
 }
 
 # Placeholder for AWS account number, update this with your AWS account number
@@ -55,23 +66,23 @@ resources = []
 
 # Fetching resources from various AWS services
 for region in ['us-east-1', 'us-west-2']:  # Add other regions as necessary
-    clients['ec2'] = boto3.client('ec2', region_name=region)
-    clients['rds'] = boto3.client('rds', region_name=region)
-    clients['elb'] = boto3.client('elb', region_name=region)
-    clients['elbv2'] = boto3.client('elbv2', region_name=region)
-    clients['ecs'] = boto3.client('ecs', region_name=region)
-    clients['dynamodb'] = boto3.client('dynamodb', region_name=region)
-    clients['sns'] = boto3.client('sns', region_name=region)
-    clients['sqs'] = boto3.client('sqs', region_name=region)
-    clients['redshift'] = boto3.client('redshift', region_name=region)
-    clients['dms'] = boto3.client('dms', region_name=region)
-    clients['secretsmanager'] = boto3.client('secretsmanager', region_name=region)
-    clients['elasticache'] = boto3.client('elasticache', region_name=region)
-    clients['es'] = boto3.client('es', region_name=region)
-    clients['elasticbeanstalk'] = boto3.client('elasticbeanstalk', region_name=region)
-    clients['s3'] = boto3.client('s3', region_name=region)
-    clients['ecr'] = boto3.client('ecr', region_name=region)
-    clients['route53'] = boto3.client('route53', region_name=region)
+    clients['ec2'] = boto3.client('ec2', region_name=region, config=config)
+    clients['rds'] = boto3.client('rds', region_name=region, config=config)
+    clients['elb'] = boto3.client('elb', region_name=region, config=config)
+    clients['elbv2'] = boto3.client('elbv2', region_name=region, config=config)
+    clients['ecs'] = boto3.client('ecs', region_name=region, config=config)
+    clients['dynamodb'] = boto3.client('dynamodb', region_name=region, config=config)
+    clients['sns'] = boto3.client('sns', region_name=region, config=config)
+    clients['sqs'] = boto3.client('sqs', region_name=region, config=config)
+    clients['redshift'] = boto3.client('redshift', region_name=region, config=config)
+    clients['dms'] = boto3.client('dms', region_name=region, config=config)
+    clients['secretsmanager'] = boto3.client('secretsmanager', region_name=region, config=config)
+    clients['elasticache'] = boto3.client('elasticache', region_name=region, config=config)
+    clients['es'] = boto3.client('es', region_name=region, config=config)
+    clients['elasticbeanstalk'] = boto3.client('elasticbeanstalk', region_name=region, config=config)
+    clients['s3'] = boto3.client('s3', region_name=region, config=config)
+    clients['ecr'] = boto3.client('ecr', region_name=region, config=config)
+    clients['route53'] = boto3.client('route53', region_name=region, config=config)
 
     # Example for fetching EC2 instances
     ec2_instances = paginate_boto3_results(clients['ec2'], 'describe_instances', 'Reservations')
@@ -191,8 +202,8 @@ for region in ['us-east-1', 'us-west-2']:  # Add other regions as necessary
         })
 
     # Example for fetching DMS replication instances
-    dms_reps = paginate_boto3_results(clients['dms'], 'describe_replication_instances', 'ReplicationInstances')
-    for rep in dms_reps:
+    dms_replication_instances = paginate_boto3_results(clients['dms'], 'describe_replication_instances', 'ReplicationInstances')
+    for rep in dms_replication_instances:
         arn = rep['ReplicationInstanceArn']
         tags = get_tags(clients['dms'], 'dms', arn)
         resources.append({
