@@ -1,10 +1,121 @@
-Traceback (most recent call last):
-  File "H:\pychram\pulled\newtest\newscriptmulti.py", line 289, in <module>
-    es_domains = paginate_boto3_results(clients['es'], 'list_domain_names', 'DomainNames')
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "H:\pychram\pulled\newtest\newscriptmulti.py", line 35, in paginate_boto3_results
+import boto3
+import csv
+
+# Initialize boto3 clients for different AWS services
+clients = {
+    'lambda': boto3.client('lambda'),
+    'ec2': boto3.client('ec2'),
+    'rds': boto3.client('rds'),
+    'elb': boto3.client('elb'),
+    'elbv2': boto3.client('elbv2'),
+    'ecs': boto3.client('ecs'),
+    'dynamodb': boto3.client('dynamodb'),
+    'sns': boto3.client('sns'),
+    'sqs': boto3.client('sqs'),
+    'redshift': boto3.client('redshift'),
+    'dms': boto3.client('dms'),
+    'secretsmanager': boto3.client('secretsmanager'),
+    'elasticache': boto3.client('elasticache'),
+    'es': boto3.client('es'),
+    'elasticbeanstalk': boto3.client('elasticbeanstalk'),
+    's3': boto3.client('s3'),
+    'ecr': boto3.client('ecr'),
+    'route53': boto3.client('route53')
+}
+
+# Placeholder for AWS account number, update this with your AWS account number
+account_number = '123456789012'
+
+# Placeholder for Fiserv-specific tag keys
+fiserv_tag_keys = ['Project', 'CostCenter', 'Owner', 'Environment']
+
+# Utility function to get tags for a given resource
+def get_tags(client, service, resource_arn):
+    try:
+        if service == 'ec2':
+            tags_response = client.describe_tags(Filters=[{'Name': 'resource-id', 'Values': [resource_arn]}])
+            return {tag['Key']: tag['Value'] for tag in tags_response.get('Tags', [])}
+        else:
+            tags_response = client.list_tags_for_resource(ResourceName=resource_arn)
+            return {tag['Key']: tag['Value'] for tag in tags_response.get('Tags', [])}
+    except Exception as e:
+        print(f"Error getting tags for {resource_arn}: {e}")
+        return {}
+
+# Function to fetch results from paginated boto3 calls
+def paginate_boto3_results(client, method, key):
+    results = []
     paginator = client.get_paginator(method)
-                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\client.py", line 1164, in get_paginator
-    raise OperationNotPageableError(operation_name=operation_name)
-botocore.exceptions.OperationNotPageableError: Operation cannot be paginated: list_domain_names
+    for page in paginator.paginate():
+        results.extend(page[key])
+    return results
+
+# List to hold resource information
+resources = []
+
+# Fetching resources from various AWS services
+for region in ['us-east-1', 'us-west-2']:  # Add other regions as necessary
+    clients['ec2'] = boto3.client('ec2', region_name=region)
+    clients['rds'] = boto3.client('rds', region_name=region)
+    clients['elb'] = boto3.client('elb', region_name=region)
+    clients['elbv2'] = boto3.client('elbv2', region_name=region)
+    clients['ecs'] = boto3.client('ecs', region_name=region)
+    clients['dynamodb'] = boto3.client('dynamodb', region_name=region)
+    clients['sns'] = boto3.client('sns', region_name=region)
+    clients['sqs'] = boto3.client('sqs', region_name=region)
+    clients['redshift'] = boto3.client('redshift', region_name=region)
+    clients['dms'] = boto3.client('dms', region_name=region)
+    clients['secretsmanager'] = boto3.client('secretsmanager', region_name=region)
+    clients['elasticache'] = boto3.client('elasticache', region_name=region)
+    clients['es'] = boto3.client('es', region_name=region)
+    clients['elasticbeanstalk'] = boto3.client('elasticbeanstalk', region_name=region)
+    clients['s3'] = boto3.client('s3', region_name=region)
+    clients['ecr'] = boto3.client('ecr', region_name=region)
+    clients['route53'] = boto3.client('route53', region_name=region)
+
+    # Example for fetching EC2 instances
+    ec2_instances = paginate_boto3_results(clients['ec2'], 'describe_instances', 'Reservations')
+    for reservation in ec2_instances:
+        for instance in reservation['Instances']:
+            tags = get_tags(clients['ec2'], 'ec2', instance['InstanceId'])
+            resources.append({
+                'ResourceType': 'EC2 Instance',
+                'ResourceArn': instance['InstanceId'],
+                'ResourceName': instance['InstanceId'],
+                'Region': region,
+                'Tags': tags
+            })
+
+    # Continue fetching other resources similarly...
+
+    # Fetch Elasticsearch (OpenSearch) domains without pagination
+    es_domains = clients['es'].list_domain_names().get('DomainNames', [])
+    for domain in es_domains:
+        domain_arn = f"arn:aws:es:{region}:{account_number}:domain/{domain['DomainName']}"
+        tags = get_tags(clients['es'], 'es', domain_arn)
+        resources.append({
+            'ResourceType': 'Elasticsearch Domain',
+            'ResourceArn': domain_arn,
+            'ResourceName': domain['DomainName'],
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Continue with fetching other resources and adding to the `resources` list...
+
+# Write to CSV
+with open('aws_resources.csv', mode='w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerow(['ResourceType', 'ResourceArn', 'ResourceName', 'Region'] + fiserv_tag_keys)
+    
+    for resource in resources:
+        row = [
+            resource['ResourceType'], 
+            resource['ResourceArn'], 
+            resource['ResourceName'], 
+            resource['Region']
+        ]
+        row.extend([resource['Tags'].get(key, '') for key in fiserv_tag_keys])
+        writer.writerow(row)
+
+print(f"{len(resources)} resources written to aws_resources.csv")
