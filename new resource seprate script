@@ -4299,6 +4299,14 @@ def get_s3_tags(bucket_name, s3_client):
             print(f"Error fetching tags for S3 bucket {bucket_name}: {e}")
             return {}
 
+def get_resource_tags(client, resource_arn):
+    try:
+        response = client.list_tags_for_resource(ResourceName=resource_arn)
+        return {tag['Key']: tag['Value'] for tag in response.get('Tags', [])}
+    except ClientError as e:
+        print(f"Error fetching tags for resource {resource_arn}: {e}")
+        return {}
+
 def collect_resources_for_region(region):
     ec2_client = clients[region]['ec2']
     rds_client = clients[region]['rds']
@@ -4325,7 +4333,7 @@ def collect_resources_for_region(region):
     ec2_instances = paginate_boto3_results(ec2_client, 'describe_instances', 'Reservations')
     for reservation in ec2_instances:
         for instance in reservation['Instances']:
-            tags = get_ec2_tags(instance['InstanceId'])
+            tags = get_resource_tags(ec2_client, instance['InstanceId'])
             resources.append({
                 'ResourceType': 'EC2 Instance',
                 'ResourceArn': f"arn:aws:ec2:{region}:{account_number}:instance/{instance['InstanceId']}",
@@ -4337,7 +4345,7 @@ def collect_resources_for_region(region):
     # Fetch RDS DB instances
     rds_instances = paginate_boto3_results(rds_client, 'describe_db_instances', 'DBInstances')
     for instance in rds_instances:
-        tags = get_rds_tags(instance['DBInstanceArn'])
+        tags = get_resource_tags(rds_client, instance['DBInstanceArn'])
         resources.append({
             'ResourceType': 'RDS DB Instance',
             'ResourceArn': instance['DBInstanceArn'],
@@ -4349,7 +4357,7 @@ def collect_resources_for_region(region):
     # Fetch RDS DB clusters
     rds_clusters = paginate_boto3_results(rds_client, 'describe_db_clusters', 'DBClusters')
     for cluster in rds_clusters:
-        tags = get_rds_tags(cluster['DBClusterArn'])
+        tags = get_resource_tags(rds_client, cluster['DBClusterArn'])
         resources.append({
             'ResourceType': 'RDS DB Cluster',
             'ResourceArn': cluster['DBClusterArn'],
@@ -4361,7 +4369,7 @@ def collect_resources_for_region(region):
     # Fetch Lambda functions
     lambda_functions = paginate_boto3_results(lambda_client, 'list_functions', 'Functions')
     for function in lambda_functions:
-        tags = get_lambda_tags(function['FunctionArn'])
+        tags = get_resource_tags(lambda_client, function['FunctionArn'])
         resources.append({
             'ResourceType': 'Lambda Function',
             'ResourceArn': function['FunctionArn'],
@@ -4373,7 +4381,7 @@ def collect_resources_for_region(region):
     # Fetch Classic Load Balancers
     elbs = paginate_boto3_results(elb_client, 'describe_load_balancers', 'LoadBalancerDescriptions')
     for elb in elbs:
-        tags = get_elb_tags(elb['LoadBalancerName'])
+        tags = get_resource_tags(elb_client, elb['LoadBalancerName'])
         resources.append({
             'ResourceType': 'Classic Load Balancer',
             'ResourceArn': f"arn:aws:elasticloadbalancing:{region}:{account_number}:loadbalancer/{elb['LoadBalancerName']}",
@@ -4385,7 +4393,7 @@ def collect_resources_for_region(region):
     # Fetch Application Load Balancers
     albs = paginate_boto3_results(elbv2_client, 'describe_load_balancers', 'LoadBalancers')
     for alb in albs:
-        tags = get_elbv2_tags(alb['LoadBalancerArn'])
+        tags = get_resource_tags(elbv2_client, alb['LoadBalancerArn'])
         resources.append({
             'ResourceType': 'Application Load Balancer',
             'ResourceArn': alb['LoadBalancerArn'],
@@ -4399,20 +4407,20 @@ def collect_resources_for_region(region):
     for cluster_arn in ecs_clusters:
         tag_response = ecs_client.list_tags_for_resource(resourceArn=cluster_arn)
         cluster_tags = tag_response.get('tags', [])
-        fiserv_tags = {tag['key']: tag['value'] for tag in cluster_tags}
+        tags = {tag['key']: tag['value'] for tag in cluster_tags}
         resources.append({
             'ResourceType': 'ECS Cluster',
             'ResourceArn': cluster_arn,
             'ResourceName': cluster_arn.split('/')[-1],
             'Region': region,
-            'Tags': fiserv_tags
+            'Tags': tags
         })
 
     # Fetch DynamoDB tables
     dynamodb_tables = paginate_boto3_results(dynamodb_client, 'list_tables', 'TableNames')
     for table_name in dynamodb_tables:
         table_arn = f"arn:aws:dynamodb:{region}:{account_number}:table/{table_name}"
-        tags = get_dynamodb_tags(table_arn)
+        tags = get_resource_tags(dynamodb_client, table_arn)
         resources.append({
             'ResourceType': 'DynamoDB Table',
             'ResourceArn': table_arn,
@@ -4425,7 +4433,7 @@ def collect_resources_for_region(region):
     sns_topics = paginate_boto3_results(sns_client, 'list_topics', 'Topics')
     for topic in sns_topics:
         topic_arn = topic['TopicArn']
-        tags = get_sns_tags(topic_arn)
+        tags = get_resource_tags(sns_client, topic_arn)
         resources.append({
             'ResourceType': 'SNS Topic',
             'ResourceArn': topic_arn,
@@ -4437,7 +4445,8 @@ def collect_resources_for_region(region):
     # Fetch SQS queues
     sqs_queues = paginate_boto3_results(sqs_client, 'list_queues', 'QueueUrls')
     for queue_url in sqs_queues:
-        tags = get_sqs_tags(queue_url)
+        queue_arn = f"arn:aws:sqs:{region}:{account_number}:{queue_url.split('/')[-1]}"
+        tags = get_resource_tags(sqs_client, queue_arn)
         resources.append({
             'ResourceType': 'SQS Queue',
             'ResourceArn': queue_url,
@@ -4449,10 +4458,10 @@ def collect_resources_for_region(region):
     # Fetch Redshift clusters
     redshift_clusters = paginate_boto3_results(redshift_client, 'describe_clusters', 'Clusters')
     for cluster in redshift_clusters:
-        tags = get_redshift_tags(cluster['ClusterArn'])
+        tags = get_resource_tags(redshift_client, cluster['ClusterNamespaceArn'])
         resources.append({
             'ResourceType': 'Redshift Cluster',
-            'ResourceArn': cluster['ClusterArn'],
+            'ResourceArn': cluster['ClusterNamespaceArn'],
             'ResourceName': cluster['ClusterIdentifier'],
             'Region': region,
             'Tags': tags
@@ -4461,7 +4470,7 @@ def collect_resources_for_region(region):
     # Fetch DMS replication instances
     dms_instances = paginate_boto3_results(dms_client, 'describe_replication_instances', 'ReplicationInstances')
     for instance in dms_instances:
-        tags = get_dms_tags(instance['ReplicationInstanceArn'])
+        tags = get_resource_tags(dms_client, instance['ReplicationInstanceArn'])
         resources.append({
             'ResourceType': 'DMS Replication Instance',
             'ResourceArn': instance['ReplicationInstanceArn'],
@@ -4473,7 +4482,7 @@ def collect_resources_for_region(region):
     # Fetch Secrets Manager secrets
     secrets = paginate_boto3_results(secretsmanager_client, 'list_secrets', 'SecretList')
     for secret in secrets:
-        tags = get_secretsmanager_tags(secret['ARN'])
+        tags = get_resource_tags(secretsmanager_client, secret['ARN'])
         resources.append({
             'ResourceType': 'Secrets Manager Secret',
             'ResourceArn': secret['ARN'],
@@ -4485,10 +4494,10 @@ def collect_resources_for_region(region):
     # Fetch ElastiCache clusters
     elasticache_clusters = paginate_boto3_results(elasticache_client, 'describe_cache_clusters', 'CacheClusters')
     for cluster in elasticache_clusters:
-        tags = get_elasticache_tags(cluster['ARN'])
+        tags = get_resource_tags(elasticache_client, cluster['CacheClusterId'])
         resources.append({
             'ResourceType': 'ElastiCache Cluster',
-            'ResourceArn': cluster['ARN'],
+            'ResourceArn': f"arn:aws:elasticache:{region}:{account_number}:cluster/{cluster['CacheClusterId']}",
             'ResourceName': cluster['CacheClusterId'],
             'Region': region,
             'Tags': tags
@@ -4498,7 +4507,7 @@ def collect_resources_for_region(region):
     es_domains = paginate_boto3_results(es_client, 'list_domain_names', 'DomainNames')
     for domain in es_domains:
         domain_name = domain['DomainName']
-        tags = get_opensearch_tags(domain_name)
+        tags = get_resource_tags(es_client, domain_name)
         resources.append({
             'ResourceType': 'OpenSearch Domain',
             'ResourceArn': f"arn:aws:es:{region}:{account_number}:domain/{domain_name}",
@@ -4510,7 +4519,7 @@ def collect_resources_for_region(region):
     # Fetch Elastic Beanstalk environments
     eb_environments = paginate_boto3_results(elasticbeanstalk_client, 'describe_environments', 'Environments')
     for environment in eb_environments:
-        tags = get_elasticbeanstalk_tags(environment['EnvironmentName'])
+        tags = get_resource_tags(elasticbeanstalk_client, environment['EnvironmentName'])
         resources.append({
             'ResourceType': 'Elastic Beanstalk Environment',
             'ResourceArn': f"arn:aws:elasticbeanstalk:{region}:{account_number}:environment/{environment['ApplicationName']}/{environment['EnvironmentName']}",
@@ -4543,7 +4552,7 @@ def collect_resources_for_region(region):
     ecr_repositories = paginate_boto3_results(ecr_client, 'describe_repositories', 'repositories')
     for repo in ecr_repositories:
         repo_arn = repo['repositoryArn']
-        tags = get_ecr_tags(repo_arn)
+        tags = get_resource_tags(ecr_client, repo_arn)
         resources.append({
             'ResourceType': 'ECR Repository',
             'ResourceArn': repo_arn,
@@ -4559,7 +4568,7 @@ def collect_resources_for_region(region):
         zone_id = zone['Id'].split('/')[-1]
         if zone_id not in processed_zones:
             processed_zones.add(zone_id)
-            tags = get_route53_tags(zone_id)
+            tags = get_resource_tags(route53_client, zone_id)
             resources.append({
                 'ResourceType': 'Route 53 Hosted Zone',
                 'ResourceArn': f"arn:aws:route53:::hostedzone/{zone_id}",
