@@ -188,11 +188,39 @@ def collect_resources_for_region(region):
     # Fetch ECS clusters
     ecs_clusters = paginate_boto3_results(ecs_client, 'list_clusters', 'clusterArns')
     for cluster_arn in ecs_clusters:
+        cluster_name = cluster_arn.split('/')[-1]
         tags = get_resource_tags(ecs_client, cluster_arn, 'ecs')
         resources.append({
             'ResourceType': 'ECS Cluster',
             'ResourceArn': cluster_arn,
-            'ResourceName': cluster_arn.split('/')[-1],
+            'ResourceName': cluster_name,
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch ECS services
+    for cluster_arn in ecs_clusters:
+        ecs_services = paginate_boto3_results(ecs_client, 'list_services', 'serviceArns')
+        for service_arn in ecs_services:
+            service_name = service_arn.split('/')[-1]
+            tags = get_resource_tags(ecs_client, service_arn, 'ecs')
+            resources.append({
+                'ResourceType': 'ECS Service',
+                'ResourceArn': service_arn,
+                'ResourceName': service_name,
+                'Region': region,
+                'Tags': tags
+            })
+
+    # Fetch ECS task definitions
+    ecs_task_defs = paginate_boto3_results(ecs_client, 'list_task_definitions', 'taskDefinitionArns')
+    for task_def_arn in ecs_task_defs:
+        task_def_name = task_def_arn.split('/')[-1]
+        tags = get_resource_tags(ecs_client, task_def_arn, 'ecs')
+        resources.append({
+            'ResourceType': 'ECS Task Definition',
+            'ResourceArn': task_def_arn,
+            'ResourceName': task_def_name,
             'Region': region,
             'Tags': tags
         })
@@ -213,12 +241,11 @@ def collect_resources_for_region(region):
     # Fetch SNS topics
     sns_topics = paginate_boto3_results(sns_client, 'list_topics', 'Topics')
     for topic in sns_topics:
-        topic_arn = topic['TopicArn']
-        tags = get_resource_tags(sns_client, topic_arn, 'sns')
+        tags = get_resource_tags(sns_client, topic['TopicArn'], 'sns')
         resources.append({
             'ResourceType': 'SNS Topic',
-            'ResourceArn': topic_arn,
-            'ResourceName': topic_arn.split(':')[-1],
+            'ResourceArn': topic['TopicArn'],
+            'ResourceName': topic['TopicArn'].split(':')[-1],
             'Region': region,
             'Tags': tags
         })
@@ -230,7 +257,7 @@ def collect_resources_for_region(region):
         tags = get_resource_tags(sqs_client, queue_arn, 'sqs')
         resources.append({
             'ResourceType': 'SQS Queue',
-            'ResourceArn': queue_url,
+            'ResourceArn': queue_arn,
             'ResourceName': queue_url.split('/')[-1],
             'Region': region,
             'Tags': tags
@@ -275,68 +302,62 @@ def collect_resources_for_region(region):
     # Fetch ElastiCache clusters
     elasticache_clusters = paginate_boto3_results(elasticache_client, 'describe_cache_clusters', 'CacheClusters')
     for cluster in elasticache_clusters:
-        tags = get_resource_tags(elasticache_client, cluster['CacheClusterId'], 'elasticache')
+        tags = get_resource_tags(elasticache_client, cluster['CacheClusterArn'], 'elasticache')
         resources.append({
             'ResourceType': 'ElastiCache Cluster',
-            'ResourceArn': f"arn:aws:elasticache:{region}:{account_number}:cluster/{cluster['CacheClusterId']}",
+            'ResourceArn': cluster['CacheClusterArn'],
             'ResourceName': cluster['CacheClusterId'],
             'Region': region,
             'Tags': tags
         })
 
-    # Fetch OpenSearch domains
+    # Fetch Elasticsearch domains
     es_domains = paginate_boto3_results(es_client, 'list_domain_names', 'DomainNames')
     for domain in es_domains:
-        domain_name = domain['DomainName']
-        tags = get_resource_tags(es_client, domain_name, 'opensearch')
+        domain_arn = f"arn:aws:es:{region}:{account_number}:domain/{domain['DomainName']}"
+        tags = get_resource_tags(es_client, domain_arn, 'es')
         resources.append({
-            'ResourceType': 'OpenSearch Domain',
-            'ResourceArn': f"arn:aws:es:{region}:{account_number}:domain/{domain_name}",
-            'ResourceName': domain_name,
+            'ResourceType': 'Elasticsearch Domain',
+            'ResourceArn': domain_arn,
+            'ResourceName': domain['DomainName'],
             'Region': region,
             'Tags': tags
         })
 
-    # Fetch Elastic Beanstalk environments
-    eb_environments = paginate_boto3_results(elasticbeanstalk_client, 'describe_environments', 'Environments')
-    for environment in eb_environments:
-        tags = get_resource_tags(elasticbeanstalk_client, environment['EnvironmentName'], 'elasticbeanstalk')
+    # Fetch Elastic Beanstalk applications
+    elasticbeanstalk_apps = paginate_boto3_results(elasticbeanstalk_client, 'describe_applications', 'Applications')
+    for app in elasticbeanstalk_apps:
+        app_arn = f"arn:aws:elasticbeanstalk:{region}:{account_number}:application/{app['ApplicationName']}"
+        tags = get_resource_tags(elasticbeanstalk_client, app_arn, 'elasticbeanstalk')
         resources.append({
-            'ResourceType': 'Elastic Beanstalk Environment',
-            'ResourceArn': f"arn:aws:elasticbeanstalk:{region}:{account_number}:environment/{environment['ApplicationName']}/{environment['EnvironmentName']}",
-            'ResourceName': environment['EnvironmentName'],
+            'ResourceType': 'Elastic Beanstalk Application',
+            'ResourceArn': app_arn,
+            'ResourceName': app['ApplicationName'],
             'Region': region,
             'Tags': tags
         })
 
     # Fetch S3 buckets
-    try:
-        s3_buckets = s3_client.list_buckets().get('Buckets', [])
-        processed_buckets = set()  # To avoid duplicates
-        for bucket in s3_buckets:
-            bucket_name = bucket['Name']
-            if bucket_name not in processed_buckets:
-                processed_buckets.add(bucket_name)
-                bucket_region = get_s3_region(bucket_name, s3_client)
-                tags = get_s3_tags(bucket_name, s3_client)
-                resources.append({
-                    'ResourceType': 'S3 Bucket',
-                    'ResourceArn': f"arn:aws:s3:::{bucket_name}",
-                    'ResourceName': bucket_name,
-                    'Region': bucket_region,
-                    'Tags': tags
-                })
-    except ClientError as e:
-        print(f"Error fetching S3 buckets: {e}")
+    s3_buckets = paginate_boto3_results(s3_client, 'list_buckets', 'Buckets')
+    for bucket in s3_buckets:
+        bucket_region = get_s3_region(bucket['Name'], s3_client)
+        bucket_arn = f"arn:aws:s3:::{bucket['Name']}"
+        tags = get_s3_tags(bucket['Name'], s3_client)
+        resources.append({
+            'ResourceType': 'S3 Bucket',
+            'ResourceArn': bucket_arn,
+            'ResourceName': bucket['Name'],
+            'Region': bucket_region,
+            'Tags': tags
+        })
 
     # Fetch ECR repositories
-    ecr_repositories = paginate_boto3_results(ecr_client, 'describe_repositories', 'repositories')
-    for repo in ecr_repositories:
-        repo_arn = repo['repositoryArn']
-        tags = get_resource_tags(ecr_client, repo_arn, 'ecr')
+    ecr_repos = paginate_boto3_results(ecr_client, 'describe_repositories', 'repositories')
+    for repo in ecr_repos:
+        tags = get_resource_tags(ecr_client, repo['repositoryArn'], 'ecr')
         resources.append({
             'ResourceType': 'ECR Repository',
-            'ResourceArn': repo_arn,
+            'ResourceArn': repo['repositoryArn'],
             'ResourceName': repo['repositoryName'],
             'Region': region,
             'Tags': tags
@@ -344,75 +365,37 @@ def collect_resources_for_region(region):
 
     # Fetch Route 53 hosted zones
     route53_zones = paginate_boto3_results(route53_client, 'list_hosted_zones', 'HostedZones')
-    processed_zones = set()  # To avoid duplicates
     for zone in route53_zones:
-        zone_id = zone['Id'].split('/')[-1]
-        if zone_id not in processed_zones:
-            processed_zones.add(zone_id)
-            tags = get_resource_tags(route53_client, zone_id, 'route53')
-            resources.append({
-                'ResourceType': 'Route 53 Hosted Zone',
-                'ResourceArn': f"arn:aws:route53:::hostedzone/{zone_id}",
-                'ResourceName': zone['Name'],
-                'Region': region,
-                'Tags': tags
-            })
+        zone_arn = f"arn:aws:route53::{account_number}:hostedzone/{zone['Id'].split('/')[-1]}"
+        tags = get_resource_tags(route53_client, zone['Id'].split('/')[-1], 'route53')
+        resources.append({
+            'ResourceType': 'Route 53 Hosted Zone',
+            'ResourceArn': zone_arn,
+            'ResourceName': zone['Name'],
+            'Region': 'global',
+            'Tags': tags
+        })
 
     return resources
 
-# Collect all resources
+# Collect resources for all specified regions
 all_resources = []
 for region in regions:
     all_resources.extend(collect_resources_for_region(region))
 
-# Define your desired tag keys
-fiserv_tag_keys = ['Environment', 'Project']  # Update with your actual tag keys
+# Write collected resources to CSV file
+csv_columns = ['ResourceType', 'ResourceArn', 'ResourceName', 'Region', 'Tags']
+csv_file = "aws_resources.csv"
 
-# Write resources to CSV
-csv_headers = ['Resource Type', 'Resource ARN', 'Region', 'Resource Name', 'Account Number'] + fiserv_tag_keys
+try:
+    with open(csv_file, 'w') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
+        writer.writeheader()
+        for resource in all_resources:
+            tags_str = ';'.join([f"{key}={value}" for key, value in resource['Tags'].items()])
+            resource['Tags'] = tags_str
+            writer.writerow(resource)
+except IOError as e:
+    print(f"I/O error({e.errno}): {e.strerror}")
 
-with open('all_resources.csv', 'w', newline='') as csvfile:
-    writer = csv.writer(csvfile)
-    writer.writerow(csv_headers)
-
-    for resource in all_resources:
-        resource_type = resource['ResourceType']
-        resource_arn = resource['ResourceArn']
-        resource_name = resource['ResourceName']
-        region = resource['Region']
-        tags = resource['Tags']
-        fiserv_tags = [tags.get(tag, '') for tag in fiserv_tag_keys]
-
-        row_data = [resource_type, resource_arn, region, resource_name, account_number] + fiserv_tags
-        writer.writerow(row_data)
-
-
-
-
-
-
-
-Traceback (most recent call last):
-  File "H:\pychram\pulled\newtest\newscriptmulti.py", line 366, in <module>
-    all_resources.extend(collect_resources_for_region(region))
-                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "H:\pychram\pulled\newtest\newscriptmulti.py", line 191, in collect_resources_for_region
-    tags = get_resource_tags(ecs_client, cluster_arn, 'ecs')
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "H:\pychram\pulled\newtest\newscriptmulti.py", line 74, in get_resource_tags
-    response = client.list_tags_for_resource(ResourceArn=resource_arn)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\client.py", line 565, in _api_call
-    return self._make_api_call(operation_name, kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\client.py", line 974, in _make_api_call
-    request_dict = self._convert_to_request_dict(
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\client.py", line 1048, in _convert_to_request_dict
-    request_dict = self._serializer.serialize_to_request(
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\validate.py", line 381, in serialize_to_request
-    raise ParamValidationError(report=report.generate_report())
-botocore.exceptions.ParamValidationError: Parameter validation failed:
-Missing required parameter in input: "resourceArn"
-Unknown parameter in input: "ResourceArn", must be one of: resourceArn
+print(f"Resources have been written to {csv_file}")
