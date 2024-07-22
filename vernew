@@ -367,3 +367,34 @@ with open('aws_resources.csv', 'w', newline='') as csvfile:
         writer.writerow(row)
 
 print("Resource details have been written to aws_resources.csv")
+
+
+
+
+Traceback (most recent call last):
+  File "H:\pychram\pulled\newtest\vernew.py", line 189, in <module>
+    services = paginate_boto3_results(clients['ecs'], 'list_services', 'serviceArns')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "H:\pychram\pulled\newtest\vernew.py", line 34, in paginate_boto3_results
+    for page in paginator.paginate():
+  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\paginate.py", line 269, in __iter__
+    response = self._make_request(current_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\paginate.py", line 357, in _make_request
+    return self._method(**current_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\client.py", line 565, in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\client.py", line 1021, in _make_api_call
+    raise error_class(parsed_response, operation_name)
+botocore.errorfactory.ClusterNotFoundException: An error occurred (ClusterNotFoundException) when calling the ListServices operation:
+
+
+
+
+
+
+
+
+
