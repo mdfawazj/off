@@ -930,3 +930,26 @@ with open('aws_resources.csv', mode='w', newline='') as file:
         writer.writerow(row)
 
 print(f"Resource inventory has been written to aws_resources.csv")
+
+
+
+
+
+
+
+
+
+
+
+
+
+Traceback (most recent call last):
+  File "H:\pychram\pulled\newtest\vernew.py", line 67, in <module>
+    tags = get_tags(clients[region]['ec2'], 'ec2', instance['InstanceId'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "H:\pychram\pulled\newtest\vernew.py", line 49, in get_tags
+    except client.exceptions.ResourceNotFoundException:
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\F37YHCS\AppData\Roaming\Python\Python311\site-packages\botocore\errorfactory.py", line 51, in __getattr__
+    raise AttributeError(
+AttributeError: <botocore.errorfactory.EC2Exceptions object at 0x0000022E73FC9790> object has no attribute ResourceNotFoundException. Valid exceptions are:
