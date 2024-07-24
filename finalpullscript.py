@@ -380,3 +380,45 @@ with open('all_resources.csv', 'w', newline='') as csvfile:
 
         row_data = [resource_type, resource_arn, region, resource_name, account_number] + fiserv_tags
         writer.writerow(row_data)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+###############################################new add
+
+
+# Fetch Amplify apps
+    amplify_apps = paginate_boto3_results(clients['amplify'], 'list_apps', 'apps')
+    for app in amplify_apps:
+        tags = get_tags(clients['amplify'], 'amplify', app['appArn'])
+        resources.append({
+            'ResourceType': 'Amplify App',
+            'ResourceArn': app['appArn'],
+            'ResourceName': app['name'],
+            'Region': region,
+            'Tags': tags
+        })
+
+    # Fetch Cognito user pools
+    cognito_user_pools = paginate_boto3_results(clients['cognito-idp'], 'list_user_pools', 'UserPools', MaxResults=60)
+    for pool in cognito_user_pools:
+        tags = get_tags(clients['cognito-idp'], 'cognito-idp', pool['Id'])
+        resources.append({
+            'ResourceType': 'Cognito User Pool',
+            'ResourceArn': pool['Id'],
+            'ResourceName': pool['Name'],
+            'Region': region,
+            'Tags': tags
+        })
