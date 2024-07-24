@@ -559,3 +559,36 @@ Traceback (most recent call last):
 botocore.exceptions.ParamValidationError: Parameter validation failed:
 Missing required parameter in input: "MaxResults"
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+import boto3
+
+def get_cognito_user_pools(client):
+    user_pools = paginate_boto3_results(client, 'list_user_pools', 'UserPools')
+    for user_pool in user_pools:
+        yield user_pool
+
+def paginate_boto3_results(client, method_name, result_key, max_results=50):
+    paginator = client.get_paginator(method_name)
+    for page in paginator.paginate(MaxResults=max_results):
+        for item in page[result_key]:
+            yield item
+
+if __name__ == "__main__":
+    clients = {
+        'cognito-idp': boto3.client('cognito-idp')
+    }
+    for user_pool in get_cognito_user_pools(clients['cognito-idp']):
+        print(user_pool)
+
