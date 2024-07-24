@@ -422,3 +422,17 @@ with open('all_resources.csv', 'w', newline='') as csvfile:
             'Region': region,
             'Tags': tags
         })
+
+
+
+
+
+
+
+
+
+Traceback (most recent call last):
+  File "H:\pychram\pulled\newtest\vernewcopy.py", line 392, in <module>
+    cognito_user_pools = paginate_boto3_results(clients['cognito-idp'], 'list_user_pools', 'UserPools', MaxResults=60)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: paginate_boto3_results() got an unexpected keyword argument 'MaxResults'
