@@ -592,3 +592,52 @@ if __name__ == "__main__":
     for user_pool in get_cognito_user_pools(clients['cognito-idp']):
         print(user_pool)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def get_cognito_user_pools(client):
+    user_pools = paginate_boto3_results(client, 'list_user_pools', 'UserPools', MaxResults=50)
+    for pool in user_pools:
+        tags = get_tags(client, 'cognito', pool['Id'])
+        yield {
+            'ResourceType': 'Cognito User Pool',
+            'ResourceArn': f"arn:aws:cognito-idp:{region}:{account_number}:userpool/{pool['Id']}",
+            'ResourceName': pool['Name'],
+            'Region': region,
+            'Tags': tags
+        }
+
+def get_cognito_user_pool_clients(client, user_pool_id):
+    clients = paginate_boto3_results(client, 'list_user_pool_clients', 'UserPoolClients', MaxResults=50)
+    for client_data in clients:
+        tags = get_tags(client, 'cognito', client_data['ClientId'])
+        yield {
+            'ResourceType': 'Cognito User Pool Client',
+            'ResourceArn': f"arn:aws:cognito-idp:{region}:{account_number}:userpool/{user_pool_id}/client/{client_data['ClientId']}",
+            'ResourceName': client_data['ClientName'],
+            'Region': region,
+            'Tags': tags
+        }
+
+# Main code for standalone execution
+if __name__ == "__main__":
+    clients = {
+        'cognito-idp': boto3.client('cognito-idp')
+    }
+    resources = []
