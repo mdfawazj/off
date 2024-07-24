@@ -716,3 +716,15 @@ if __name__ == "__main__":
         print(resource)
 
 
+
+
+
+
+Traceback (most recent call last):
+  File "H:\pychram\pulled\newtest\vernewcopy.py", line 313, in <module>
+    resources = list_aws_resources()
+                ^^^^^^^^^^^^^^^^^^^^
+  File "H:\pychram\pulled\newtest\vernewcopy.py", line 12, in list_aws_resources
+    session = boto3.Session(region_name=region, verify=False)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: Session.__init__() got an unexpected keyword argument 'verify'
