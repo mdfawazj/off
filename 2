@@ -1,3 +1,38 @@
+        'cognito': boto3.client('cognito-identity', region_name=region, verify=False),
+        'cognito_client': boto3.client('cognito-idp', region_name=region, verify=False),
+
+
+# Fetch Cognito User Pools
+        cognito_user_pools = paginate_boto3_results(clients['cognito_client'], 'list_user_pools', 'UserPools')
+        for pool in cognito_user_pools:
+            pool_arn = pool['Id']
+            tags = get_tags(clients['cognito_client'], 'cognito-idp', pool_arn)
+            resources.append({
+                'ResourceType': 'Cognito User Pool',
+                'ResourceArn': pool_arn,
+                'ResourceName': pool['Name'],
+                'Region': region,
+                'Tags': tags
+            })
+
+        # Fetch Cognito Identity Pools
+        cognito_identity_pools = paginate_boto3_results(clients['cognito'], 'list_identity_pools', 'IdentityPools')
+        for pool in cognito_identity_pools:
+            pool_arn = pool['IdentityPoolId']
+            tags = get_tags(clients['cognito'], 'cognito-identity', pool_arn)
+            resources.append({
+                'ResourceType': 'Cognito Identity Pool',
+                'ResourceArn': pool_arn,
+                'ResourceName': pool['IdentityPoolName'],
+                'Region': region,
+                'Tags': tags
+            })
+        
+
+
+
+
+
 import boto3
 import csv
 from botocore.exceptions import ClientError
