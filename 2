@@ -1,38 +1,3 @@
-        'cognito': boto3.client('cognito-identity', region_name=region, verify=False),
-        'cognito_client': boto3.client('cognito-idp', region_name=region, verify=False),
-
-
-# Fetch Cognito User Pools
-        cognito_user_pools = paginate_boto3_results(clients['cognito_client'], 'list_user_pools', 'UserPools')
-        for pool in cognito_user_pools:
-            pool_arn = pool['Id']
-            tags = get_tags(clients['cognito_client'], 'cognito-idp', pool_arn)
-            resources.append({
-                'ResourceType': 'Cognito User Pool',
-                'ResourceArn': pool_arn,
-                'ResourceName': pool['Name'],
-                'Region': region,
-                'Tags': tags
-            })
-
-        # Fetch Cognito Identity Pools
-        cognito_identity_pools = paginate_boto3_results(clients['cognito'], 'list_identity_pools', 'IdentityPools')
-        for pool in cognito_identity_pools:
-            pool_arn = pool['IdentityPoolId']
-            tags = get_tags(clients['cognito'], 'cognito-identity', pool_arn)
-            resources.append({
-                'ResourceType': 'Cognito Identity Pool',
-                'ResourceArn': pool_arn,
-                'ResourceName': pool['IdentityPoolName'],
-                'Region': region,
-                'Tags': tags
-            })
-        
-
-
-
-
-
 import boto3
 import csv
 from botocore.exceptions import ClientError
@@ -67,10 +32,17 @@ def create_clients(region):
         'route53': boto3.client('route53', region_name='us-east-1', verify=False),
     }
 
-def paginate_boto3_results(client, method, key):
+# def paginate_boto3_results(client, method, key):
+#     results = []
+#     paginator = client.get_paginator(method)
+#     for page in paginator.paginate():
+#         results.extend(page.get(key, []))
+#     return results
+
+def paginate_boto3_results(client, method, key, params=None):
     results = []
     paginator = client.get_paginator(method)
-    for page in paginator.paginate():
+    for page in paginator.paginate(**params if params else {}):
         results.extend(page.get(key, []))
     return results
 
@@ -82,9 +54,6 @@ def get_tags(client, resource_type, arn):
             return {tag['Key']: tag['Value'] for tag in response.get('TagSet', [])}
         elif resource_type == 'ec2':
             response = client.describe_tags(Filters=[{'Name': 'resource-id', 'Values': [arn]}])
-            return {tag['Key']: tag['Value'] for tag in response.get('Tags', [])}
-        elif resource_type == 'cognito-idp':  # For Cognito User Pools
-            response = client.list_tags_for_resource(ResourceArn=arn)
             return {tag['Key']: tag['Value'] for tag in response.get('Tags', [])}
         elif resource_type == 'rds':
             response = client.list_tags_for_resource(ResourceName=arn)
@@ -100,12 +69,13 @@ def get_tags(client, resource_type, arn):
                 response = client.list_tags_for_resource(ResourceArn=arn)
                 tags = {tag['Key']: tag['Value'] for tag in response.get('Tags', [])}
             return tags
-        # elif resource_type == cognito_client:  # Checking against cognito_client as the resource_type
-        #     if 'user-pool' in arn:
-        #         user_pool_id = arn.split('/')[-1]  # Extract the User Pool ID from the ARN
-        #         response = cognito_client.list_tags_for_resource(ResourceARN=user_pool_id)
-        #         tags = {tag['Key']: tag['Value'] for tag in response.get('Tags', [])}
-        #     return tags
+        elif resource_type == 'cognito_client':  # Checking against 'cognito_client' string as the resource_type
+            # Your code logic for handling cognito_client
+            if 'user-pool' in arn:
+                user_pool_id = arn.split('/')[-1]  # Extract the User Pool ID from the ARN
+                response = clients['cognito_client'].list_tags_for_resource(ResourceARN=user_pool_id)
+                tags = {tag['Key']: tag['Value'] for tag in response.get('Tags', [])}
+            return tags
         elif resource_type == 'elb':
             response = client.describe_tags(LoadBalancerNames=[arn])
             tags = {}
@@ -135,6 +105,9 @@ def get_tags(client, resource_type, arn):
         elif resource_type == 'dms':
             response = client.list_tags_for_resource(ResourceArn=arn)
             return {tag['Key']: tag['Value'] for tag in response.get('TagList', [])}
+        # elif resource_type == 'dms':
+        #     response = client.list_tags_for_resource(ResourceArn=arn)
+        #     return {tag['Key']: tag['Value'] for tag in response.get('TagList', [])}
         elif resource_type == 'secretsmanager':
             response = client.describe_secret(SecretId=arn)
             return {tag['Key']: tag['Value'] for tag in response.get('Tags', [])}
@@ -169,125 +142,73 @@ for region in regions:
     print(f"Processing region: {region}")
     clients = create_clients(region)
 
-    # Fetch Cognito User Pools and process tags
-    cognito_user_pools = paginate_boto3_results(clients['cognito-idp'], 'list_user_pools', 'UserPools')
-    for user_pool in cognito_user_pools:
-        user_pool_id = user_pool['Id']
-
-        # Get tags specific to Cognito User Pools
-        tags = get_tags(clients['cognito-idp'], 'cognito-idp', user_pool_id)
-
-        # Construct resource details
-        resource_arn = f"arn:aws:cognito-idp:{region}:{account_number}:userpool/{user_pool_id}"
-        resource_name = tags.get('Name') if 'Name' in tags else 'N/A'
-
-        # Add resource details to the 'resources' list
+    # Fetch Cognito User Pools
+    cognito_user_pools = paginate_boto3_results(clients['cognito_client'], 'list_user_pools', 'UserPools', {'MaxResults': 20})
+    for pool in cognito_user_pools:
+        pool_arn = pool['Id']
+        tags = get_tags(clients['cognito_client'], 'cognito-idp', pool_arn)
         resources.append({
             'ResourceType': 'Cognito User Pool',
-            'ResourceArn': resource_arn,
-            'ResourceName': resource_name,
+            'ResourceArn': pool_arn,
+            'ResourceName': pool['Name'],
             'Region': region,
             'Tags': tags
         })
-    # # Fetch Cognito user pools
-    # response = clients['cognito_client'].list_user_pools(
-    #     MaxResults=50)  # Change list_identity_pools to list_user_pools if you are fetching User Pools
+
+        # Fetch Cognito Identity Pools
+        cognito_identity_pools = paginate_boto3_results(clients['cognito'], 'list_identity_pools', 'IdentityPools', {'MaxResults': 10})
+        for pool in cognito_identity_pools:
+            pool_arn = pool['IdentityPoolId']
+            tags = get_tags(clients['cognito'], 'cognito-identity', pool_arn)
+            resources.append({
+                'ResourceType': 'Cognito Identity Pool',
+                'ResourceArn': pool_arn,
+                'ResourceName': pool['IdentityPoolName'],
+                'Region': region,
+                'Tags': tags
+            })
+
+    # # Fetch Cognito identities or user pools (example)
+    # # Get a list of Identity Pool IDs
+    # response = clients['cognito'].list_identity_pools(MaxResults=10)  # Adjust MaxResults as needed
+    # identity_pool_ids = [pool['IdentityPoolId'] for pool in response.get('IdentityPools', [])]
     #
-    # user_pool_ids = [pool['Id'] for pool in response.get('UserPools', [])]
-    #
-    # for user_pool_id in user_pool_ids:
+    # for identity_pool_id in identity_pool_ids:
     #     next_token = None
     #     cognito_identities = []
     #
     #     while True:
-    #         next_token_str = next_token or None  # Set next_token_str to None if next_token is empty
-    #         response = clients['cognito_client'].list_users(
-    #             UserPoolId=user_pool_id,
-    #             Limit=50,
-    #             PaginationToken=next_token_str  # Pass the PaginationToken directly
+    #         # next_token_str = next_token if next_token else ''  # Convert None to empty string
+    #         # response = clients['cognito'].list_identities(
+    #         #     IdentityPoolId=identity_pool_id,
+    #         #     MaxResults=50,
+    #         #     NextToken=next_token_str
+    #         # )
+    #         next_token_str = str(next_token) if next_token else 'placeholder_token'  # Provide a placeholder token if next_token is empty
+    #         response = clients['cognito'].list_identities(
+    #             IdentityPoolId=identity_pool_id,
+    #             MaxResults=50,
+    #             NextToken=next_token_str
     #         )
     #
-    #         cognito_identities.extend(response.get('Users', []))
-    #         next_token = response.get('PaginationToken', None)  # Ensure next_token remains of type None if not present
+    #         cognito_identities.extend(response.get('Identities', []))
+    #         next_token = response.get('NextToken', '')
     #
     #         if not next_token:
     #             break
     #
+    #     for identity in cognito_identities:
+    #         identity_Arn = identity.get('Arn', 'N/A')
+    #         identity_name = identity.get('IdentityPoolName', 'N/A')
     #
-    #     for user_pool_id in user_pool_ids:
-    #         next_token = ''
-    #
-    #         while True:
-    #             next_token_str = next_token if next_token else None  # Set next_token_str to None if next_token is empty
-    #
-    #             # Fetch identities for the given User Pool ID using the cognito_client
-    #             response = clients['cognito_client'].list_users(
-    #                 UserPoolArn=user_pool_id,
-    #                 Limit=50,
-    #                 PaginationToken=str(next_token_str) if next_token_str is not None else None
-    #             )
-    #
-    #             cognito_identities = response.get('Users', [])
-    #             next_token = response.get('PaginationToken')
-    #
-    #             if not next_token:
-    #                 break
-    #
-    #             # Process the fetched identities
-    #             for user in cognito_identities:
-    #                 user_arn = user['Attributes'].get('sub', 'N/A')
-    #                 user_name = user.get('Username', 'N/A')
-    #
-    #                 tags = get_tags(clients['cognito_client'], 'cognito_client', user_arn)
-    #                 resources.append({
-    #                     'ResourceType': 'Cognito User',
-    #                     'ResourceArn': user_arn,
-    #                     'ResourceName': user_name,
-    #                     'Region': region,
-    #                     'Tags': tags
-    #                 })
-
-    # Fetch Cognito identities or user pools (example)
-    # Get a list of Identity Pool IDs
-    response = clients['cognito'].list_identity_pools(MaxResults=10)  # Adjust MaxResults as needed
-    identity_pool_ids = [pool['IdentityPoolId'] for pool in response.get('IdentityPools', [])]
-
-    for identity_pool_id in identity_pool_ids:
-        next_token = None
-        cognito_identities = []
-
-        while True:
-            # next_token_str = next_token if next_token else ''  # Convert None to empty string
-            # response = clients['cognito'].list_identities(
-            #     IdentityPoolId=identity_pool_id,
-            #     MaxResults=50,
-            #     NextToken=next_token_str
-            # )
-            next_token_str = str(next_token) if next_token else 'placeholder_token'  # Provide a placeholder token if next_token is empty
-            response = clients['cognito'].list_identities(
-                IdentityPoolId=identity_pool_id,
-                MaxResults=50,
-                NextToken=next_token_str
-            )
-
-            cognito_identities.extend(response.get('Identities', []))
-            next_token = response.get('NextToken', '')
-
-            if not next_token:
-                break
-
-        for identity in cognito_identities:
-            identity_Arn = identity.get('Arn', 'N/A')
-            identity_name = identity.get('IdentityPoolName', 'N/A')
-
-            tags = get_tags(clients['cognito'], 'cognito', identity.get('Arn', 'N/A'))
-            resources.append({
-                'ResourceType': 'Cognito Identity',
-                'ResourceArn': identity_Arn,
-                'ResourceName': identity_name,
-                'Region': region,
-                'Tags': tags
-            })
+    #         tags = get_tags(clients['cognito'], 'cognito', identity.get('Arn', 'N/A'))
+    #         resources.append({
+    #             'ResourceType': 'Cognito Identity',
+    #             'ResourceArn': identity_Arn,
+    #             'ResourceName': identity_name,
+    #             'Region': region,
+    #             'Tags': tags
+    #         })
 
     # Fetch EC2 instances
     ec2_instances = paginate_boto3_results(clients['ec2'], 'describe_instances', 'Reservations')
@@ -628,7 +549,7 @@ with open('all_resources_gift_dev.csv', 'w', newline='') as csvfile:
         resource_name = resource['ResourceName']
         tags = resource['Tags']
         region = resource['Region']  # Use the region from the resource data
-        fiserv_tags = [tags.get(tag, '') for tag in fiserv_tag_keys]
+        fiserv_tags = [tags.get(tag, '') if tags is not None else '' for tag in fiserv_tag_keys]
 
         row_data = [resource_type, resource_arn, region, resource_name, account_number] + fiserv_tags
         writer.writerow(row_data)
