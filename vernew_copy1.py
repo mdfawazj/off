@@ -1,3 +1,8 @@
+elif service == 'sqs':
+        response = client.list_queue_tags(QueueUrl=resource_id)
+        tags = response['Tags']
+
+
 Traceback (most recent call last):
   File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 167, in <module>
     tags = get_tags(client_dict['sqs'], 'sqs', queue_url)
