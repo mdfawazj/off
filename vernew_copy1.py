@@ -1,13 +1,13 @@
 Traceback (most recent call last):
-  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 81, in <module>
-    tags = get_tags(client_dict['lambda'], 'lambda', function['FunctionArn'])
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 18, in get_tags
+  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 108, in <module>
+    tags = get_tags(client_dict['elbv2'], 'elbv2', elbv2['LoadBalancerArn'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 21, in get_tags
     response = client.list_tags_for_resource(ResourceArn=resource_id)
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "C:\Users\f37yhcs\AppData\Roaming\Python\Python311\site-packages\botocore\client.py", line 918, in __getattr__
     raise AttributeError(
-AttributeError: 'Lambda' object has no attribute 'list_tags_for_resource'
+AttributeError: 'ElasticLoadBalancingv2' object has no attribute 'list_tags_for_resource'
 
 
 
