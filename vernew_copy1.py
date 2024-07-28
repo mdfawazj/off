@@ -1,3 +1,41 @@
+def paginate_boto3_results(client, method, key, max_results=None, **kwargs):
+    paginator = client.get_paginator(method)
+    if max_results:
+        pagination_config = {'MaxResults': max_results}
+        for page in paginator.paginate(PaginationConfig=pagination_config, **kwargs):
+            for item in page[key]:
+                yield item
+    else:
+        for page in paginator.paginate(**kwargs):
+            for item in page[key]:
+                yield item
+
+
+
+
+
+def paginate_boto3_results(client, method, key, requires_max_results=False, **kwargs):
+    paginator = client.get_paginator(method)
+    if requires_max_results:
+        pagination_config = {'MaxResults': 50}
+        for page in paginator.paginate(PaginationConfig=pagination_config, **kwargs):
+            for item in page[key]:
+                yield item
+    else:
+        for page in paginator.paginate(**kwargs):
+            for item in page[key]:
+                yield item
+
+
+
+
+
+
+
+
+
+
+
 Traceback (most recent call last):
   File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 278, in <module>
     for user_pool in cognito_user_pools:
