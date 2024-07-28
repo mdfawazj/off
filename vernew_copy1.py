@@ -1,3 +1,9 @@
+elif service == 'secretsmanager':
+        response = client.list_tags(SecretId=resource_id)
+        tags = {tag['Key']: tag['Value'] for tag in response['Tags']}
+
+
+
 Traceback (most recent call last):
   File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 209, in <module>
     tags = get_tags(client_dict['secretsmanager'], 'secretsmanager', secret['ARN'])
