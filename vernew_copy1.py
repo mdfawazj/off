@@ -1,3 +1,15 @@
+Traceback (most recent call last):
+  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 212, in <module>
+    tags = get_tags(client_dict['secretsmanager'], 'secretsmanager', secret['ARN'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 36, in get_tags
+    response = client.list_tags(SecretId=resource_id)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\f37yhcs\AppData\Roaming\Python\Python311\site-packages\botocore\client.py", line 918, in __getattr__
+    raise AttributeError(
+AttributeError: 'SecretsManager' object has no attribute 'list_tags'
+
+
 elif service == 'secretsmanager':
         response = client.list_tags(SecretId=resource_id)
         tags = {tag['Key']: tag['Value'] for tag in response['Tags']}
