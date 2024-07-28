@@ -1,3 +1,10 @@
+Traceback (most recent call last):
+  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew11.py", line 121, in <module>
+    user_pools = paginate_boto3_results(clients['cognito-idp'], 'list_user_pools', 'UserPools')
+                                        ~~~~~~~^^^^^^^^^^^^^^^
+KeyError: 'cognito-idp'
+
+
 import boto3
 import csv
 from botocore.exceptions import ClientError
