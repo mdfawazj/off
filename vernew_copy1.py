@@ -1,3 +1,19 @@
+def paginate_boto3_results(client, method, key, **kwargs):
+    paginator = client.get_paginator(method)
+    if 'MaxResults' in kwargs:
+        pagination_config = {'MaxResults': kwargs.pop('MaxResults')}
+        for page in paginator.paginate(PaginationConfig=pagination_config, **kwargs):
+            for item in page[key]:
+                yield item
+    else:
+        for page in paginator.paginate(**kwargs):
+            for item in page[key]:
+                yield item
+
+
+
+
+
 Traceback (most recent call last):
   File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 273, in <module>
     for user_pool in cognito_user_pools:
