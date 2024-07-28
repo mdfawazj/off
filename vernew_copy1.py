@@ -1,3 +1,14 @@
+Traceback (most recent call last):
+  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 194, in <module>
+    tags = get_tags(client_dict['dms'], 'dms', instance['ReplicationInstanceArn'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 34, in get_tags
+    tags = {tag['Key']: tag['Value'] for tag in response['Tags']}
+                                                ~~~~~~~~^^^^^^^^
+KeyError: 'Tags'
+
+
+
 elif service == 'sqs':
         response = client.list_queue_tags(QueueUrl=resource_id)
         tags = response['Tags']
