@@ -1,3 +1,16 @@
+Traceback (most recent call last):
+  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 167, in <module>
+    tags = get_tags(client_dict['sqs'], 'sqs', queue_url)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 30, in get_tags
+    response = client.list_tags_for_resource(ResourceArn=resource_id)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\f37yhcs\AppData\Roaming\Python\Python311\site-packages\botocore\client.py", line 918, in __getattr__
+    raise AttributeError(
+AttributeError: 'SQS' object has no attribute 'list_tags_for_resource'
+
+
+
 elif service == 'dynamodb':
         response = client.list_tags_of_resource(ResourceArn=resource_id)
         tags = {tag['Key']: tag['Value'] for tag in response['Tags']}
