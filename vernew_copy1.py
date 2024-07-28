@@ -1,3 +1,19 @@
+elif service == 'secretsmanager':
+        response = client.describe_secret(SecretId=resource_id)
+        tags = {tag['Key']: tag['Value'] for tag in response.get('Tags', [])}
+    elif service == 'elasticache':
+        response = client.list_tags_for_resource(ResourceName=resource_id)
+        tags = {tag['Key']: tag['Value'] for tag in response['TagList']}
+    elif service == 'elasticsearch':
+        response = client.list_tags(ARN=resource_id)
+        tags = {tag['Key']: tag['Value'] for tag in response['TagList']}
+    elif service == 'cognito':
+        response = client.list_tags_for_resource(ResourceArn=resource_id)
+        tags = {tag['Key']: tag['Value'] for tag in response.get('Tags', [])}
+
+
+
+
 Traceback (most recent call last):
   File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 212, in <module>
     tags = get_tags(client_dict['secretsmanager'], 'secretsmanager', secret['ARN'])
