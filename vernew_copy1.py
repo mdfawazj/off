@@ -1,13 +1,6 @@
-Traceback (most recent call last):
-  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 140, in <module>
-    tags = get_tags(client_dict['dynamodb'], 'dynamodb', table_arn)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 27, in get_tags
-    response = client.list_tags_for_resource(ResourceArn=resource_id)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\f37yhcs\AppData\Roaming\Python\Python311\site-packages\botocore\client.py", line 918, in __getattr__
-    raise AttributeError(
-AttributeError: 'DynamoDB' object has no attribute 'list_tags_for_resource'. Did you mean: 'list_tags_of_resource'?
+elif service == 'dynamodb':
+        response = client.list_tags_of_resource(ResourceArn=resource_id)
+        tags = {tag['Key']: tag['Value'] for tag in response['Tags']}
 
 
 
