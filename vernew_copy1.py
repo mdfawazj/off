@@ -1,3 +1,22 @@
+def get_tags(client, service, resource_id):
+    if service == 'ec2':
+        response = client.describe_tags(Filters=[{'Name': 'resource-id', 'Values': [resource_id]}])
+        tags = {tag['Key']: tag['Value'] for tag in response['Tags']}
+    elif service == 'rds':
+        response = client.list_tags_for_resource(ResourceName=resource_id)
+        tags = {tag['Key']: tag['Value'] for tag in response['TagList']}
+    elif service == 'lambda':
+        response = client.list_tags(Resource=resource_id)
+        tags = response['Tags']
+    elif service == 'elbv2':
+        response = client.describe_tags(ResourceArns=[resource_id])
+        tags = {tag['Key']: tag['Value'] for tag in response['TagDescriptions'][0]['Tags']}
+    else:
+        response = client.list_tags_for_resource(ResourceArn=resource_id)
+        tags = {tag['Key']: tag['Value'] for tag in response['Tags']}
+    return tags
+
+
 Traceback (most recent call last):
   File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 108, in <module>
     tags = get_tags(client_dict['elbv2'], 'elbv2', elbv2['LoadBalancerArn'])
