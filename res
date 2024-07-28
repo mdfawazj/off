@@ -1,3 +1,83 @@
+def paginate_boto3_results(client, method, key):
+    results = []
+    paginator = client.get_paginator(method)
+    page_iterator = paginator.paginate(PaginationConfig={'MaxItems': 1000})
+    
+    for page in page_iterator:
+        results.extend(page.get(key, []))
+        
+    return results
+
+
+
+
+
+def fetch_cognito_user_pools(client):
+    results = []
+    paginator = client.get_paginator('list_user_pools')
+    for page in paginator.paginate(MaxResults=60):
+        results.extend(page.get('UserPools', []))
+    return results
+
+def fetch_cognito_identity_pools(client):
+    results = []
+    paginator = client.get_paginator('list_identity_pools')
+    for page in paginator.paginate(MaxResults=60):
+        results.extend(page.get('IdentityPools', []))
+    return results
+
+
+
+
+# Fetch Cognito User Pools
+try:
+    user_pools = fetch_cognito_user_pools(clients['cognito-idp'])
+    for pool in user_pools:
+        pool_arn = f"arn:aws:cognito-idp:{region}:{account_number}:userpool/{pool['Id']}"
+        tags = get_tags(clients['cognito-idp'], 'cognito-idp', pool_arn)
+        resources.append({
+            'ResourceType': 'Cognito User Pool',
+            'ResourceArn': pool_arn,
+            'ResourceName': pool['Name'],
+            'Region': region,
+            'Tags': tags
+        })
+except ClientError as e:
+    print(f"Error fetching Cognito User Pools: {e}")
+
+# Fetch Cognito Identity Pools
+try:
+    identity_pools = fetch_cognito_identity_pools(clients['cognito-identity'])
+    for pool in identity_pools:
+        pool_arn = f"arn:aws:cognito-identity:{region}:{account_number}:identitypool/{pool['IdentityPoolId']}"
+        tags = get_tags(clients['cognito-identity'], 'cognito-identity', pool_arn)
+        resources.append({
+            'ResourceType': 'Cognito Identity Pool',
+            'ResourceArn': pool_arn,
+            'ResourceName': pool['IdentityPoolName'],
+            'Region': region,
+            'Tags': tags
+        })
+except ClientError as e:
+    print(f"Error fetching Cognito Identity Pools: {e}")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Traceback (most recent call last):
   File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew11.py", line 124, in <module>
     user_pools = paginate_boto3_results(clients['cognito-idp'], 'list_user_pools', 'UserPools')
