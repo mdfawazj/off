@@ -1,4 +1,17 @@
 Traceback (most recent call last):
+  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew11.py", line 301, in <module>
+    es_domains = paginate_boto3_results(clients['es'], 'list_domain_names', 'DomainNames')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew11.py", line 35, in paginate_boto3_results
+    paginator = client.get_paginator(method)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\f37yhcs\AppData\Roaming\Python\Python311\site-packages\botocore\client.py", line 1164, in get_paginator
+    raise OperationNotPageableError(operation_name=operation_name)
+botocore.exceptions.OperationNotPageableError: Operation cannot be paginated: list_domain_names
+
+
+
+Traceback (most recent call last):
   File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew11.py", line 288, in <module>
     elasticache_clusters = paginate_boto3_results(clients['elasticache'], 'list_clusters', 'CacheClusters')
                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
