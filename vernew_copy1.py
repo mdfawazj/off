@@ -1,3 +1,8 @@
+elif service == 'es':
+        response = client.list_tags(ARN=resource_id)
+        tags = {tag['Key']: tag['Value'] for tag in response['TagList']}
+
+
 Traceback (most recent call last):
   File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 252, in <module>
     tags = get_tags(client_dict['es'], 'es', domain_arn)
