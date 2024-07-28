@@ -1,3 +1,18 @@
+Error fetching tags for elasticache sbox-merchant: An error occurred (InvalidARN) when calling the ListTagsForResource operation: Input ARN string does not have 7 components.
+Traceback (most recent call last):
+  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 314, in <module>
+    es_domains = paginate_boto3_results(clients['es'], 'list_domain_names', 'DomainNames')
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 39, in paginate_boto3_results
+    paginator = client.get_paginator(method)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\f37yhcs\AppData\Roaming\Python\Python311\site-packages\botocore\client.py", line 1164, in get_paginator
+    raise OperationNotPageableError(operation_name=operation_name)
+botocore.exceptions.OperationNotPageableError: Operation cannot be paginated: list_domain_names
+
+
+
+
 import boto3
 import csv
 from botocore.exceptions import ClientError
