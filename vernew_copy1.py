@@ -5,8 +5,11 @@ def paginate_boto3_results(client, method, key, **kwargs):
     # Ensure MaxResults is set for methods that require it
     if method == 'list_user_pools' and 'MaxResults' not in pagination_config:
         pagination_config['MaxResults'] = 50
-    
-    for page in paginator.paginate(PaginationConfig=pagination_config, **kwargs):
+
+    # Merge the pagination config into kwargs
+    kwargs['PaginationConfig'] = pagination_config
+
+    for page in paginator.paginate(**kwargs):
         for item in page[key]:
             yield item
 
