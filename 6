@@ -1,3 +1,14 @@
+Traceback (most recent call last):
+  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 723, in <module>
+    for domain in elasticsearch_domains:
+  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 470, in paginate_boto3_results
+    paginator = client.get_paginator(method)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\f37yhcs\AppData\Roaming\Python\Python311\site-packages\botocore\client.py", line 1164, in get_paginator
+    raise OperationNotPageableError(operation_name=operation_name)
+botocore.exceptions.OperationNotPageableError: Operation cannot be paginated: list_domain_names
+
+
 import boto3
 import csv
 
