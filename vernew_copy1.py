@@ -1,3 +1,10 @@
+elif service == 'dms':
+        response = client.list_tags_for_resource(ResourceArn=resource_id)
+        tags = {tag['Key']: tag['Value'] for tag in response.get('TagList', [])}
+
+
+
+
 Traceback (most recent call last):
   File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 194, in <module>
     tags = get_tags(client_dict['dms'], 'dms', instance['ReplicationInstanceArn'])
