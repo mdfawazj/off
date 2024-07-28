@@ -1,3 +1,21 @@
+Traceback (most recent call last):
+  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 710, in <module>
+    tags = get_tags(client_dict['elasticache'], 'elasticache', cluster['CacheClusterId'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 514, in get_tags
+    response = client.list_tags_for_resource(ResourceName=resource_id)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\f37yhcs\AppData\Roaming\Python\Python311\site-packages\botocore\client.py", line 565, in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\f37yhcs\AppData\Roaming\Python\Python311\site-packages\botocore\client.py", line 1021, in _make_api_call
+    raise error_class(parsed_response, operation_name)
+botocore.errorfactory.InvalidARNFault: An error occurred (InvalidARN) when calling the ListTagsForResource operation: Input ARN string does not have 7 components
+
+
+
+
+
 import boto3
 import csv
 
