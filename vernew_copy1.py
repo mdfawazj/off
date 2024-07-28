@@ -1,3 +1,10 @@
+elif service == 'ecs':
+        response = client.list_tags_for_resource(resourceArn=resource_id)
+        tags = {tag['key']: tag['value'] for tag in response['tags']}
+    else:
+
+
+
 Traceback (most recent call last):
   File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 124, in <module>
     tags = get_tags(client_dict['ecs'], 'ecs', cluster_arn)
