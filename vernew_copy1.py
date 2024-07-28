@@ -1,32 +1,24 @@
-def get_tags(client, service, resource_id):
-    if service == 'ec2':
-        response = client.describe_tags(Filters=[{'Name': 'resource-id', 'Values': [resource_id]}])
-        tags = {tag['Key']: tag['Value'] for tag in response['Tags']}
-    elif service == 'rds':
-        response = client.list_tags_for_resource(ResourceName=resource_id)
-        tags = {tag['Key']: tag['Value'] for tag in response['TagList']}
-    elif service == 'lambda':
-        response = client.list_tags(Resource=resource_id)
-        tags = response['Tags']
-    elif service == 'elbv2':
-        response = client.describe_tags(ResourceArns=[resource_id])
-        tags = {tag['Key']: tag['Value'] for tag in response['TagDescriptions'][0]['Tags']}
-    else:
-        response = client.list_tags_for_resource(ResourceArn=resource_id)
-        tags = {tag['Key']: tag['Value'] for tag in response['Tags']}
-    return tags
-
-
 Traceback (most recent call last):
-  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 108, in <module>
-    tags = get_tags(client_dict['elbv2'], 'elbv2', elbv2['LoadBalancerArn'])
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 21, in get_tags
+  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 124, in <module>
+    tags = get_tags(client_dict['ecs'], 'ecs', cluster_arn)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew_copy1.py", line 24, in get_tags
     response = client.list_tags_for_resource(ResourceArn=resource_id)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\f37yhcs\AppData\Roaming\Python\Python311\site-packages\botocore\client.py", line 918, in __getattr__
-    raise AttributeError(
-AttributeError: 'ElasticLoadBalancingv2' object has no attribute 'list_tags_for_resource'
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\f37yhcs\AppData\Roaming\Python\Python311\site-packages\botocore\client.py", line 565, in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\f37yhcs\AppData\Roaming\Python\Python311\site-packages\botocore\client.py", line 974, in _make_api_call
+    request_dict = self._convert_to_request_dict(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\f37yhcs\AppData\Roaming\Python\Python311\site-packages\botocore\client.py", line 1048, in _convert_to_request_dict
+    request_dict = self._serializer.serialize_to_request(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\f37yhcs\AppData\Roaming\Python\Python311\site-packages\botocore\validate.py", line 381, in serialize_to_request
+    raise ParamValidationError(report=report.generate_report())
+botocore.exceptions.ParamValidationError: Parameter validation failed:
+Missing required parameter in input: "resourceArn"
+Unknown parameter in input: "ResourceArn", must be one of: resourceArn
 
 
 
