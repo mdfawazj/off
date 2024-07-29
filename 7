@@ -1,3 +1,27 @@
+csv_headers = ['Resource Type', 'Resource ARN', 'Region', 'Resource Name', 'Account Number'] + fiserv_tag_keys
+
+with open('all_resources_gift_dev.csv', 'w', newline='') as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerow(csv_headers)
+
+    for resource in resources:
+        resource_type = resource['ResourceType']
+        resource_arn = resource['ResourceArn']
+        resource_name = resource['ResourceName']
+        tags = resource['Tags']
+        region = resource['Region']  # Use the region from the resource data
+        fiserv_tags = [tags.get(tag, '') for tag in fiserv_tag_keys]
+
+        row_data = [resource_type, resource_arn, region, resource_name, account_number] + fiserv_tags
+        writer.writerow(row_data)
+
+
+
+
+        
+
+
+
 import boto3
 import csv
 from botocore.exceptions import ClientError
