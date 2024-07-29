@@ -1,3 +1,32 @@
+Traceback (most recent call last):
+  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\test2.py", line 339, in <module>
+    clusters = paginate_boto3_results(clients['elasticache'], 'list_cache_clusters', 'CacheClusters')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\test2.py", line 35, in paginate_boto3_results
+    paginator = client.get_paginator(method)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\f37yhcs\AppData\Roaming\Python\Python311\site-packages\botocore\client.py", line 1163, in get_paginator
+    if not self.can_paginate(operation_name):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\f37yhcs\AppData\Roaming\Python\Python311\site-packages\botocore\client.py", line 1234, in can_paginate
+    actual_operation_name = self._PY_TO_OP_NAME[operation_name]
+                            ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+KeyError: 'list_cache_clusters'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import boto3
 import csv
 from botocore.exceptions import ClientError
