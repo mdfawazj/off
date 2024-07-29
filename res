@@ -1,3 +1,38 @@
+
+Traceback (most recent call last):
+  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew11.py", line 146, in <module>
+    tags = get_tags(clients['cognito-idp'], 'cognito-idp', pool_arn)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew11.py", line 123, in get_tags
+    return {tag['Key']: tag['Value'] for tag in response.get('UserPools', [])}
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\vernew11.py", line 123, in <dictcomp>
+    return {tag['Key']: tag['Value'] for tag in response.get('UserPools', [])}
+            ~~~^^^^^^^
+KeyError: 'Key'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def paginate_boto3_results(client, method, key):
     results = []
     paginator = client.get_paginator(method)
