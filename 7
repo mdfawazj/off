@@ -1,27 +1,3 @@
-csv_headers = ['Resource Type', 'Resource ARN', 'Region', 'Resource Name', 'Account Number'] + fiserv_tag_keys
-
-with open('all_resources_gift_dev.csv', 'w', newline='') as csvfile:
-    writer = csv.writer(csvfile)
-    writer.writerow(csv_headers)
-
-    for resource in resources:
-        resource_type = resource['ResourceType']
-        resource_arn = resource['ResourceArn']
-        resource_name = resource['ResourceName']
-        tags = resource['Tags']
-        region = resource['Region']  # Use the region from the resource data
-        fiserv_tags = [tags.get(tag, '') for tag in fiserv_tag_keys]
-
-        row_data = [resource_type, resource_arn, region, resource_name, account_number] + fiserv_tags
-        writer.writerow(row_data)
-
-
-
-
-        
-
-
-
 import boto3
 import csv
 from botocore.exceptions import ClientError
@@ -473,16 +449,46 @@ for region in regions:
     except ClientError as e:
         print(f"Error fetching Cognito Identity Pools: {e}")
 
-# Write results to a CSV file
-with open('aws_resources_with_tags.csv', 'w', newline='') as csvfile:
-    fieldnames = ['ResourceType', 'ResourceArn', 'ResourceName', 'Region', 'Tags']
-    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+# # Write results to a CSV file
+# with open('aws_resources_with_tags.csv', 'w', newline='') as csvfile:
+#     fieldnames = ['ResourceType', 'ResourceArn', 'ResourceName', 'Region', 'Tags']
+#     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+#
+#     writer.writeheader()
+#     for resource in resources:
+#         if tags is None:
+#             tags = {}
+#         resource['Tags'] = ', '.join([f"{key}={value}" for key, value in tags.items()])
+#         writer.writerow(resource)
+#
+# print("Resource information has been saved to 'aws_resources_with_tags.csv'.")
 
-    writer.writeheader()
+csv_headers = ['Resource Type', 'Resource ARN', 'Region', 'Resource Name', 'Account Number'] + fiserv_tag_keys
+
+with open('all_resources_gift_dev.csv', 'w', newline='') as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerow(csv_headers)
+
     for resource in resources:
-        if tags is None:
-            tags = {}
-        resource['Tags'] = ', '.join([f"{key}={value}" for key, value in tags.items()])
-        writer.writerow(resource)
+        resource_type = resource['ResourceType']
+        resource_arn = resource['ResourceArn']
+        resource_name = resource['ResourceName']
+        tags = resource['Tags']
+        region = resource['Region']  # Use the region from the resource data
+        fiserv_tags = [tags.get(tag, '') for tag in fiserv_tag_keys]
 
-print("Resource information has been saved to 'aws_resources_with_tags.csv'.")
+        row_data = [resource_type, resource_arn, region, resource_name, account_number] + fiserv_tags
+        writer.writerow(row_data)
+
+
+
+
+
+        Traceback (most recent call last):
+  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\test2.py", line 478, in <module>
+    fiserv_tags = [tags.get(tag, '') for tag in fiserv_tag_keys]
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\test2.py", line 478, in <listcomp>
+    fiserv_tags = [tags.get(tag, '') for tag in fiserv_tag_keys]
+                   ^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'get'
