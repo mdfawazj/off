@@ -1,3 +1,90 @@
+def get_tags(client, resource_type, arn):
+    try:
+        if resource_type == 's3':
+            response = client.get_bucket_tagging(Bucket=arn)
+            return {tag['Key']: tag['Value'] for tag in response.get('TagSet', [])}
+        elif resource_type == 'ec2':
+            response = client.describe_tags(Filters=[{'Name': 'resource-id', 'Values': [arn]}])
+            return {tag['Key']: tag['Value'] for tag in response.get('Tags', [])}
+        elif resource_type == 'rds':
+            response = client.list_tags_for_resource(ResourceName=arn)
+            return {tag['Key']: tag['Value'] for tag in response.get('TagList', [])}
+        elif resource_type == 'lambda':
+            response = client.list_tags(Resource=arn)
+            return response.get('Tags', {})
+        elif resource_type == 'elb':
+            response = client.describe_tags(LoadBalancerNames=[arn])
+            tags = {}
+            if response['TagDescriptions']:
+                for tag in response['TagDescriptions'][0]['Tags']:
+                    tags[tag['Key']] = tag['Value']
+            return tags
+        elif resource_type == 'elbv2':
+            response = client.describe_tags(ResourceArns=[arn])
+            tags = {}
+            if response['TagDescriptions']:
+                for tag in response['TagDescriptions'][0]['Tags']:
+                    tags[tag['Key']] = tag['Value']
+            return tags
+        elif resource_type == 'dynamodb':
+            response = client.list_tags_of_resource(ResourceArn=arn)
+            return {tag['Key']: tag['Value'] for tag in response.get('Tags', [])}
+        elif resource_type == 'sns':
+            response = client.list_tags_for_resource(ResourceArn=arn)
+            return {tag['Key']: tag['Value'] for tag in response.get('Tags', [])}
+        elif resource_type == 'sqs':
+            response = client.list_queue_tags(QueueUrl=arn)
+            return response.get('Tags', {})
+        elif resource_type == 'redshift':
+            response = client.describe_tags(ResourceName=arn)
+            return {tag['Key']: tag['Value'] for tag in response.get('TaggedResources', [])}
+        elif resource_type == 'dms':
+            response = client.list_tags_for_resource(ResourceArn=arn)
+            return {tag['Key']: tag['Value'] for tag in response.get('TagList', [])}
+        elif resource_type == 'secretsmanager':
+            response = client.describe_secret(SecretId=arn)
+            return {tag['Key']: tag['Value'] for tag in response.get('Tags', [])}
+        elif resource_type == 'elasticache':
+            response = client.list_tags_for_resource(ResourceName=arn)
+            return {tag['Key']: tag['Value'] for tag in response.get('TagList', [])}
+        elif resource_type == 'es':
+            response = client.list_tags(ARN=arn)
+            return {tag['Key']: tag['Value'] for tag in response.get('TagList', [])}
+        elif resource_type == 'elasticbeanstalk':
+            response = client.list_tags_for_resource(ResourceArn=arn)
+            return {tag['Key']: tag['Value'] for tag in response.get('ResourceTags', [])}
+        elif resource_type == 'ecr':
+            response = client.list_tags_for_resource(resourceArn=arn)
+            return {tag['Key']: tag['Value'] for tag in response.get('tags', [])}
+        elif resource_type == 'route53':
+            response = client.list_tags_for_resource(ResourceType='hostedzone', ResourceId=arn)
+            return {tag['Key']: tag['Value'] for tag in response.get('Tags', [])}
+        elif resource_type == 'cognito-idp':
+            # Cognito User Pools do not support tag retrieval in this way
+            return {}
+        elif resource_type == 'cognito-identity':
+            # Cognito Identity Pools do not support tag retrieval in this way
+            return {}
+    except ClientError as e:
+        print(f"Error fetching tags for {resource_type} {arn}: {e}")
+        return {}  # Ensure that an empty dictionary is returned in case of an error
+
+
+
+
+
+
+        fiserv_tags = [tags.get(tag, '') if tags else '' for tag in fiserv_tag_keys]
+
+
+
+
+
+
+
+
+
+
 import boto3
 import csv
 from botocore.exceptions import ClientError
