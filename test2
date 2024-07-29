@@ -1,3 +1,10 @@
+Traceback (most recent call last):
+  File "C:\Users\f37yhcs\Desktop\pulled\giftdev\test2.py", line 459, in <module>
+    resource['Tags'] = ', '.join([f"{key}={value}" for key, value in resource['Tags'].items()])
+                                                                     ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'items'
+
+
 Error fetching tags for route53 /hostedzone/Z3STNM0ZBNJHJJ: An error occurred (NoSuchHostedZone) when calling the ListTagsForResource operation: No hosted zone found with ID: /hostedzone/Z3STNM0ZBNJHJJ
 C:\Users\f37yhcs\AppData\Roaming\Python\Python311\site-packages\urllib3\connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host 'route53.amazonaws.com'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
   warnings.warn(
